@@ -36,4 +36,6 @@ Note that we suggest here manually placing yaml description (auto generated for 
    - Do this on a GPU cluster (will work on CPU but GPU is much faster)
    - re-enter your protein and run_name in widgets
 
+## license note
+The modified alphafold script in ./workflow/scripts is licensed under Apache 2.0 as denoted in the license at the top of the py file. Changes to the original code are noted in the top of the file also.
 
