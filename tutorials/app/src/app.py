@@ -23,6 +23,7 @@ from Bio.PDB.PDBIO import PDBIO
 import tempfile
 
 from structure_utils import select_and_align
+from protein_design import make_designs
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -139,44 +140,118 @@ def _html_body(pdb : str) -> str:
     </body>"""
     return body
 
-def _html_multipdb_body(pdbs : List[str]) -> str:
-    if len(pdbs)!=2:
-        logging.error('only support 2 proteins in multiviewer')
+# def _html_body(pdb: str) -> str:
+#     body = f"""<!DOCTYPE html>
+#         <html lang="en">
+#         <head>
+#             <meta charset="UTF-8">
+#             <meta name="viewport" content="width=device-width, initial-scale=1.0">
+#             <title>Mol* Viewer with Inline PDB Data</title>
+#             <script src="https://cdn.jsdelivr.net/npm/molstar@latest/build/viewer/molstar.js"></script>
+#             <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/molstar@latest/build/viewer/molstar.css" />
+#             <style>
+#                 #viewer {{
+#                     position: relative;
+#                     width: 800px;
+#                     height: 600px;
+#                 }}
+#             </style>
+#         </head>
+#         <body>
+#             <div id="viewer"></div>
+#             <script>
+#                 // PDB data as a string (this is a simplified example, you would include the full PDB data here)
+#                 const pdbData = `{pdb}`;
+
+#                 molstar.Viewer.create('viewer', {{
+#                     layoutIsExpanded: false,
+#                     layoutShowControls: true,
+#                     layoutShowSequence: true,
+#                     layoutShowLog: false,
+#                     layoutShowLeftPanel: false,
+#                     viewportShowExpand: true,
+#                     viewportShowSelectionMode: false,
+#                     viewportShowAnimation: false,
+#                 }}).then(viewer => {{
+#                     // Load the PDB data from the string
+#                     viewer.loadStructureFromData(pdbData, 'pdb', false);
+#                 }});
+#             </script>
+#         </body>
+#         </html>"""
+#     return body
+
+# def _html_multipdb_body(pdbs : List[str]) -> str:
+#     if len(pdbs)!=2:
+#         logging.error('only support 2 proteins in multiviewer')
+#     body = f"""<body>
+#         <div id="container" class="mol-container"></div>
+#         <script>
+#             let pdb = `{pdbs[0]}`"""
+#     body += f"""
+#             let pdbtwo = `{pdbs[1]}`"""
+#     body += """
+#             $(document).ready(function () {
+#                 const element = $("#container");
+#                 const config = { backgroundColor: "white" };
+#                 const viewer = $3Dmol.createViewer(element, config);
+#                 viewer.addModel(pdb, "pdb");
+#                 viewer.getModel(0).setStyle({}, { cartoon: {
+#                      colorscheme:"blueCarbon" 
+#                      } 
+#                 });
+#                 viewer.addModel(pdbtwo, "pdb");
+#                 viewer.getModel(1).setStyle({}, { cartoon: {
+#                      colorscheme:"greenCarbon" 
+#                      } 
+#                 });
+#                 viewer.zoomTo();
+#                 viewer.render();
+#                 })
+#         </script>
+#     </body>"""
+#     return body
+
+def _html_multipdb_body(pdbs : List[str], colors=None) -> str:
+    # if len(pdbs)!=2:
+    #     logging.error('only support 2 proteins in multiviewer')
+    
+    if colors is None:
+        colors = ['blueCarbon'] + ['greenCarbon']*(len(pdbs)-1)
+    if isinstance(colors, str):
+        colors = [colors]*len(pdbs)
+
     body = f"""<body>
         <div id="container" class="mol-container"></div>
-        <script>
-            let pdb = `{pdbs[0]}`"""
-    body += f"""
-            let pdbtwo = `{pdbs[1]}`"""
+        <script>"""
+    for i in range(len(pdbs)):
+        body += f"""
+                let pdb_{i} = `{pdbs[i]}`"""
     body += """
             $(document).ready(function () {
                 const element = $("#container");
                 const config = { backgroundColor: "white" };
-                const viewer = $3Dmol.createViewer(element, config);
-                viewer.addModel(pdb, "pdb");
-                viewer.getModel(0).setStyle({}, { cartoon: {
-                     colorscheme:"blueCarbon" 
-                     } 
-                });
-                viewer.addModel(pdbtwo, "pdb");
-                viewer.getModel(1).setStyle({}, { cartoon: {
-                     colorscheme:"greenCarbon" 
-                     } 
-                });
-                viewer.zoomTo();
-                viewer.render();
-                })
+                const viewer = $3Dmol.createViewer(element, config);"""
+    for i in range(len(pdbs)):
+        body += f"""
+            viewer.addModel(pdb_{i}, "pdb_{i}");
+            viewer.getModel({i}).setStyle({{}}, {{ cartoon: {{colorscheme:"{colors[i]}"}} }});"""
+    body += """
+        viewer.zoomTo();
+        viewer.render();
+        })
         </script>
-    </body>"""
+        </body>"""
     return body
 
 def html_direct_from_protein_(pdb : str | List[str]) -> str:
     html = "<html>"
     html += HTML_HEAD
+    # html = ""
     if isinstance(pdb, str):
         html += _html_body(pdb)
     else:
-        logging.info('constructing html body from two pdbs')
+        logging.info('constructing html body from multiple pdbs')
         html += _html_multipdb_body(pdb)
     html += "</html>"
     return html 
@@ -218,6 +293,7 @@ def af_btn_fn(run_name : str, pdb_code : Optional[str] = None, include_pdb : boo
         html = html_as_iframe(
             html_direct_from_protein_(pdb_run)
         )
+        # html = html_direct_from_protein_(pdb_run)
     return html
 
 def get_job_id(job_name : str ='alphafold'):
@@ -240,6 +316,34 @@ def af_run_btn_fn(run_name : str, protein : str) -> str:
         }
     )
     return "started run"
+
+def design_btn_fn(sequence: str) -> str:
+    n_rf_diffusion: int = 1
+    designed_pdbs = make_designs(sequence)
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        for i in range(len(designed_pdbs['designed'])):
+            with open(os.path.join(tmpdir,f"d_{i}_structure.pdb"), 'w') as f:
+                f.write(designed_pdbs['designed'][i])
+        with open(os.path.join(tmpdir,"init_structure.pdb"), 'w') as f:
+            f.write(designed_pdbs['initial'])
+
+        init_structure = PDBParser().get_structure("esmfold_initial", os.path.join(tmpdir,"init_structure.pdb"))
+        unaligned_structures = []
+        for i in range(len(designed_pdbs['designed'])):
+            unaligned_structures.append( PDBParser().get_structure("designed", os.path.join(tmpdir,f"d_{i}_structure.pdb")) )
+
+    aligned_structures = []
+    for i, ua in enumerate(unaligned_structures):
+        init_structure_str, true_structure_str = select_and_align(
+            init_structure, ua
+        )
+        if i==0:
+            aligned_structures.append(init_structure_str)  
+        aligned_structures.append(true_structure_str)               
+
+    html = html_as_iframe(html_direct_from_protein_(aligned_structures))
+    return html
 
 with gr.Blocks() as demo:
     gr.Markdown(
@@ -323,6 +427,27 @@ with gr.Blocks() as demo:
                 examples=[["PD1",True,"3bik"]],
                 inputs=[run_name,include_pdb,pdb_code],
             )
+    with gr.Tab('Design'):
+        with gr.Accordion("Details", open=False) as accordion:
+            gr.Markdown("""
+                ## Use RFdiffusion, ESMfold and ProteinMPNNN to inpaint and design proteins - eg for loop design
+                 - input sequence in format: "CASRRSG[FTYPGF]FFEQYF" where the region between square braces is to be replaced/in-painted by new designs
+            """)
+        with gr.Row():
+            protein_for_design = gr.Textbox(label="Protein",scale=4)
+            n_designs = gr.Textbox(label="number of designs",scale=4)
+            design_btn = gr.Button("Predict", scale=1)
+
+        if not ASTEXT:
+            d_html_structures = gr.HTML(label="Structure")
+        else:
+            d_html_structures = gr.Textbox(label="Structure")
+        
+        design_btn.click(
+            fn=design_btn_fn, 
+            inputs=[protein_for_design], 
+            outputs=d_html_structures
+        )
             
 
 if __name__ == "__main__":

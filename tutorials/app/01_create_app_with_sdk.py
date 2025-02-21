@@ -62,6 +62,21 @@ esmfold_resource = AppResource(
         permission = AppResourceServingEndpointServingEndpointPermission['CAN_QUERY']
     )
 )
+rfdiffusion_resource = AppResource(
+    name = 'serving-endpoint',
+    serving_endpoint=AppResourceServingEndpoint(
+        name = 'rfdiffusion_inpaint',
+        permission = AppResourceServingEndpointServingEndpointPermission['CAN_QUERY']
+    )
+)
+proteinmpnn_resource = AppResource(
+    name = 'serving-endpoint',
+    serving_endpoint=AppResourceServingEndpoint(
+        name = 'proteinmpnn',
+        permission = AppResourceServingEndpointServingEndpointPermission['CAN_QUERY']
+    )
+)
+
 notebook_path = dbutils.notebook.entry_point.getDbutils().notebook().getContext().notebookPath().get()
 src_dir = '/Workspace'+'/'.join(notebook_path.split('/')[:-1])+'/src'
 # create the app object
@@ -71,13 +86,16 @@ my_app = App(
     description = "protein folding app",
     resources = [
         af2_resource,
-        esmfold_resource
+        esmfold_resource,
+        rfdiffusion_resource,
+        proteinmpnn_resource
     ],
 )
 
 # COMMAND ----------
 
-w.apps.create_and_wait(app=my_app)
+# w.apps.create_and_wait(app=my_app)
+
 deployment = w.apps.deploy_and_wait(
     app_name=my_app.name,
     app_deployment=AppDeployment(
@@ -102,10 +120,10 @@ a.service_principal_name
 # COMMAND ----------
 
 # assign read permissions on protein_folding.alphafold.datasets and protein_folding.alphafold.results with sql statements
-spark.sql(f"GRANT USE CATALOG ON CATALOG protein_folding TO `{a.service_principal_name}`")
-spark.sql(f"GRANT USE SCHEMA ON SCHEMA protein_folding.alphafold TO `{a.service_principal_name}`")
-spark.sql(f"GRANT READ VOLUME ON VOLUME protein_folding.alphafold.datasets TO `{a.service_principal_name}`")
-spark.sql(f"GRANT READ VOLUME ON VOLUME protein_folding.alphafold.results TO `{a.service_principal_name}`")
+# spark.sql(f"GRANT USE CATALOG ON CATALOG protein_folding TO `{a.service_principal_name}`")
+# spark.sql(f"GRANT USE SCHEMA ON SCHEMA protein_folding.alphafold TO `{a.service_principal_name}`")
+# spark.sql(f"GRANT READ VOLUME ON VOLUME protein_folding.alphafold.datasets TO `{a.service_principal_name}`")
+# spark.sql(f"GRANT READ VOLUME ON VOLUME protein_folding.alphafold.results TO `{a.service_principal_name}`")
 
 # COMMAND ----------
 
