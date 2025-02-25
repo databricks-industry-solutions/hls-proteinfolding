@@ -1,29 +1,23 @@
 """ Run and view protein structure predictions
 
  - gradio app
- - Use py3dMol for viewing 
-
-notes
------
-used for setting up html for 3Dmol.js:
-https://github.com/gradio-app/gradio/issues/791
-https://huggingface.co/blog/spaces_3dmoljs
+ - Use molstar for viewing 
 """
 import gradio as gr
 import logging
 from databricks.sdk import WorkspaceClient
-# from databricks.sdk.service.serving import ChatMessage, ChatMessageRole
 import os
 from typing import Optional,List,Union
 
-import py3Dmol
 from Bio.PDB.MMCIFParser import MMCIFParser
 from Bio.PDB.PDBParser import PDBParser
 from Bio.PDB.PDBIO import PDBIO
 import tempfile
+import base64 
 
 from structure_utils import select_and_align
 from protein_design import make_designs
+from molstar_tools import molstar_html_multibody
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -37,24 +31,6 @@ assert os.getenv('SERVING_ENDPOINT'), "SERVING_ENDPOINT must be set in app.yaml.
 
 USE_DUMMY = False
 ASTEXT = False
-
-HTML_HEAD = """<head>    
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-    <style>
-    .mol-container {
-    width: 100%;
-    height: 500px;
-    position: relative;
-    }
-    .mol-container select{
-        background-image:None;
-    }
-    </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.3/jquery.min.js" integrity="sha512-STof4xm1wgkfm7heWqFJVn58Hm3EtS31XFaagaa8VMReCXAkQnJZ+jEy8PCC/iT18dFy95WcExNHFTqLyp72eQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
-    <script src="https://3Dmol.org/build/3Dmol.ui-min.js"></script>     
-</head>"""
-#     <script src="https://3Dmol.csb.pitt.edu/build/3Dmol-min.js"></script>
 
 def dummy_pdb():
     fpath = "dummy_pdb.pdb"
@@ -111,159 +87,12 @@ def pull_pdbmmcif(pdb_code : str ='4ykk') -> str:
     cif_str = str(response.contents.read(), encoding='utf-8')
     return _cif_to_pdb_str(cif_str)
 
-def html_as_iframe(html : str) -> str:
-    return f"""<iframe style="width: 100%; height: 480px" name="result" allow="midi; geolocation; microphone; camera; 
-    display-capture; encrypted-media;" sandbox="allow-modals allow-forms 
-    allow-scripts allow-same-origin allow-popups 
-    allow-top-navigation-by-user-activation allow-downloads" allowfullscreen="" 
-    allowpaymentrequest="" frameborder="0" srcdoc='{html}'></iframe>"""
-
-def _html_body(pdb : str) -> str:
-    body = f"""<body>
-        <div id="container" class="mol-container"></div>
-        <script>
-            let pdb = `{pdb}`"""
-    body += """
-            $(document).ready(function () {
-                const element = $("#container");
-                const config = { backgroundColor: "white" };
-                const viewer = $3Dmol.createViewer(element, config);
-                viewer.addModel(pdb, "pdb");
-                viewer.getModel(0).setStyle({}, { cartoon: {
-                     colorscheme:"blueCarbon" 
-                     } 
-                });
-                viewer.zoomTo();
-                viewer.render();
-                })
-        </script>
-    </body>"""
-    return body
-
-# def _html_body(pdb: str) -> str:
-#     body = f"""<!DOCTYPE html>
-#         <html lang="en">
-#         <head>
-#             <meta charset="UTF-8">
-#             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-#             <title>Mol* Viewer with Inline PDB Data</title>
-#             <script src="https://cdn.jsdelivr.net/npm/molstar@latest/build/viewer/molstar.js"></script>
-#             <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/molstar@latest/build/viewer/molstar.css" />
-#             <style>
-#                 #viewer {{
-#                     position: relative;
-#                     width: 800px;
-#                     height: 600px;
-#                 }}
-#             </style>
-#         </head>
-#         <body>
-#             <div id="viewer"></div>
-#             <script>
-#                 // PDB data as a string (this is a simplified example, you would include the full PDB data here)
-#                 const pdbData = `{pdb}`;
-
-#                 molstar.Viewer.create('viewer', {{
-#                     layoutIsExpanded: false,
-#                     layoutShowControls: true,
-#                     layoutShowSequence: true,
-#                     layoutShowLog: false,
-#                     layoutShowLeftPanel: false,
-#                     viewportShowExpand: true,
-#                     viewportShowSelectionMode: false,
-#                     viewportShowAnimation: false,
-#                 }}).then(viewer => {{
-#                     // Load the PDB data from the string
-#                     viewer.loadStructureFromData(pdbData, 'pdb', false);
-#                 }});
-#             </script>
-#         </body>
-#         </html>"""
-#     return body
-
-# def _html_multipdb_body(pdbs : List[str]) -> str:
-#     if len(pdbs)!=2:
-#         logging.error('only support 2 proteins in multiviewer')
-#     body = f"""<body>
-#         <div id="container" class="mol-container"></div>
-#         <script>
-#             let pdb = `{pdbs[0]}`"""
-#     body += f"""
-#             let pdbtwo = `{pdbs[1]}`"""
-#     body += """
-#             $(document).ready(function () {
-#                 const element = $("#container");
-#                 const config = { backgroundColor: "white" };
-#                 const viewer = $3Dmol.createViewer(element, config);
-#                 viewer.addModel(pdb, "pdb");
-#                 viewer.getModel(0).setStyle({}, { cartoon: {
-#                      colorscheme:"blueCarbon" 
-#                      } 
-#                 });
-#                 viewer.addModel(pdbtwo, "pdb");
-#                 viewer.getModel(1).setStyle({}, { cartoon: {
-#                      colorscheme:"greenCarbon" 
-#                      } 
-#                 });
-#                 viewer.zoomTo();
-#                 viewer.render();
-#                 })
-#         </script>
-#     </body>"""
-#     return body
-
-def _html_multipdb_body(pdbs : List[str], colors=None) -> str:
-    # if len(pdbs)!=2:
-    #     logging.error('only support 2 proteins in multiviewer')
-    
-    if colors is None:
-        colors = ['blueCarbon'] + ['greenCarbon']*(len(pdbs)-1)
-    if isinstance(colors, str):
-        colors = [colors]*len(pdbs)
-
-    body = f"""<body>
-        <div id="container" class="mol-container"></div>
-        <script>"""
-    for i in range(len(pdbs)):
-        body += f"""
-                let pdb_{i} = `{pdbs[i]}`"""
-    body += """
-            $(document).ready(function () {
-                const element = $("#container");
-                const config = { backgroundColor: "white" };
-                const viewer = $3Dmol.createViewer(element, config);"""
-    for i in range(len(pdbs)):
-        body += f"""
-            viewer.addModel(pdb_{i}, "pdb_{i}");
-            viewer.getModel({i}).setStyle({{}}, {{ cartoon: {{colorscheme:"{colors[i]}"}} }});"""
-    body += """
-        viewer.zoomTo();
-        viewer.render();
-        })
-        </script>
-        </body>"""
-    return body
-
-def html_direct_from_protein_(pdb : str | List[str]) -> str:
-    html = "<html>"
-    html += HTML_HEAD
-    # html = ""
-    if isinstance(pdb, str):
-        html += _html_body(pdb)
-    else:
-        logging.info('constructing html body from multiple pdbs')
-        html += _html_multipdb_body(pdb)
-    html += "</html>"
-    return html 
-
 def pdb_btn_fn(protein : str) -> str:
     if not USE_DUMMY:
         pdb = query_esmfold(protein)
     else:
         pdb = dummy_pdb()
-    html = html_as_iframe(
-        html_direct_from_protein_(pdb)
-    )
+    html =  molstar_html_multibody(pdb_run)
     return html
 
 def af_btn_fn(run_name : str, pdb_code : Optional[str] = None, include_pdb : bool = False) -> str:
@@ -286,14 +115,9 @@ def af_btn_fn(run_name : str, pdb_code : Optional[str] = None, include_pdb : boo
                 true_structure, af_structure
             )
         logging.info('sending two pdb str to html')
-        html = html_as_iframe(
-            html_direct_from_protein_([af_structure_str, true_structure_str])
-        )
+        html = molstar_html_multibody([af_structure_str, true_structure_str])
     else:
-        html = html_as_iframe(
-            html_direct_from_protein_(pdb_run)
-        )
-        # html = html_direct_from_protein_(pdb_run)
+        html = molstar_html_multibody(pdb_run)
     return html
 
 def get_job_id(job_name : str ='alphafold'):
@@ -342,7 +166,7 @@ def design_btn_fn(sequence: str) -> str:
             aligned_structures.append(init_structure_str)  
         aligned_structures.append(true_structure_str)               
 
-    html = html_as_iframe(html_direct_from_protein_(aligned_structures))
+    html =  molstar_html_multibody(aligned_structures)
     return html
 
 with gr.Blocks() as demo:
