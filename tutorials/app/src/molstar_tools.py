@@ -46,9 +46,17 @@ END"""
 def html_as_iframe(html : str) -> str:
     return f"""<iframe style="width: 100%; height: 500px" border: None;" srcdoc='{html}'></iframe>"""
 
-def molstar_html_singlebody(pdb : str, with_iframe=True) -> str:
+def molstar_html_singlebody(pdb : str, name:Optional[str]=None, with_iframe:Optional[bool]=True) -> str:
     logging.info('doing single body molstar')
     pdb_base64 = base64.b64encode(pdb.encode()).decode()
+
+    if name is None:
+        label_dict={}
+    else:
+        label_dict = {"label": name}
+        label_dict_str = str(label_dict).replace('\'label\'', 'label')
+
+    # undefined, {label_dict_str} 
     html_str = f"""
             <!DOCTYPE html>
             <html>
@@ -78,7 +86,15 @@ def molstar_html_singlebody(pdb : str, with_iframe=True) -> str:
 
                             try {{
                                 // Load structure
-                                await viewer.loadStructureFromUrl(url, "pdb");
+                                const structure = await viewer.loadStructureFromUrl(url, "pdb");
+                                console.log("Structure loaded successfully");
+                                //const model = structure.model;
+                                //model.label = "some name";
+                                //plugin.managers.structure.hierarchy.update(structure);
+                                // Request a UI update
+                                //plugin.managers.structure.updateStructure(structure);
+
+                                // viewer.requestReprRender();
                             }} catch (error) {{
                                 console.error("Error loading structure:", error);
                             }}
@@ -93,11 +109,28 @@ def molstar_html_singlebody(pdb : str, with_iframe=True) -> str:
         return html_str
     
 
-def molstar_html_multibody(pdbs : Union[str, List[str]], with_iframe=True) -> str:
+def molstar_html_multibody(pdbs : Union[str, List[str]], names: Optional[Union[str, List[str]]]=None, with_iframe=True) -> str:
     if isinstance(pdbs, str):
         # pdbs = [pdbs]
         logging.info('sending from multi to single')
-        return molstar_html_singlebody(pdbs, with_iframe)
+        return molstar_html_singlebody(pdbs, name=names, with_iframe=with_iframe)
+
+    # list_label_dicts = []
+    list_label_dicts_strs = []
+    if names is None:
+        list_label_dicts = ["{}"]*len(pdbs)
+    else:
+        if len(pdbs)!=len(names):
+            logging.error('names must be same length as pdbs')
+        for name in names:
+            if name is not None:
+                # list_label_dicts.append({"label": name})
+                label_dict = {"label": name}
+                list_label_dicts_strs.append(str(label_dict).replace('\'label\'', 'label'))
+            else:
+                list_label_dicts_strs.append("{}")
+    # undefined,  {str(list_label_dicts[i])}
+
     html_str = f"""
             <!DOCTYPE html>
             <html>
@@ -126,7 +159,7 @@ def molstar_html_multibody(pdbs : Union[str, List[str]], with_iframe=True) -> st
                         try {"""
     for i, pdb in enumerate(pdbs):
         html_str += f"""
-                            await viewer.loadStructureFromUrl(url_{i}, "pdb");"""
+                            await viewer.loadStructureFromUrl(url_{i}, "pdb" );"""
     html_str += """
                         } catch (error) {
                             console.error("Error loading structure:", error);

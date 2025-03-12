@@ -95,9 +95,18 @@ def pdb_btn_fn(protein : str) -> str:
     html =  molstar_html_multibody(pdb_run)
     return html
 
+def apply_pdb_header(pdb_str: str, name: str) -> str:
+    header = f"""HEADER    "{name}"                           00-JAN-00   0XXX 
+    TITLE     "{name}"                         
+    COMPND    MOL_ID: 1;                                                            
+    COMPND   2 MOLECULE: {name};                          
+    COMPND   3 CHAIN: A;""" 
+    return header + pdb_str
+
 def af_btn_fn(run_name : str, pdb_code : Optional[str] = None, include_pdb : bool = False) -> str:
     
     pdb_run = pull_alphafold_run(run_name)
+    pdb_run = apply_pdb_header(pdb_run, run_name)
     if include_pdb:
         pdb_mmcif = pull_pdbmmcif(pdb_code)
         # strings to biopdb structures
@@ -114,6 +123,8 @@ def af_btn_fn(run_name : str, pdb_code : Optional[str] = None, include_pdb : boo
             true_structure_str, af_structure_str = select_and_align(
                 true_structure, af_structure
             )
+            true_structure_str = apply_pdb_header(true_structure_str, run_name)
+            af_structure_str = apply_pdb_header(af_structure_str, "alphafold2 prediction")
         logging.info('sending two pdb str to html')
         html = molstar_html_multibody([af_structure_str, true_structure_str])
     else:
@@ -169,16 +180,32 @@ def design_btn_fn(sequence: str) -> str:
     html =  molstar_html_multibody(aligned_structures)
     return html
 
-with gr.Blocks() as demo:
+theme = gr.themes.Soft(
+    primary_hue="lime",
+    secondary_hue="violet",
+    neutral_hue="zinc",
+)
+js_func = """
+function refresh() {
+    const url = new URL(window.location);
+
+    if (url.searchParams.get('__theme') !== 'dark') {
+        url.searchParams.set('__theme', 'dark');
+        window.location.href = url.href;
+    }
+}
+"""
+
+with gr.Blocks(theme=theme, js=js_func) as demo:
     gr.Markdown(
         """
-        # Protein Structure Prediction App
+        # Protein Folding and Design on Databricks
 
         """)
     with gr.Tab('ESMfold'):
         gr.Markdown(
         """
-        # Protein Structure Prediction with ESMfold!
+        # Protein Structure Prediction with ESMfold
         Enter a protein sequence and view the structure.
 
         """)
@@ -208,8 +235,8 @@ with gr.Blocks() as demo:
     with gr.Tab('alphafold'):
         gr.Markdown(
         """
-        # Protein Structure Prediction with alphafold!
-        You can run a structure prediction or view previous runs
+        # Protein Structure Prediction with alphafold
+        You can start a run of structure prediction or view previous runs
 
         """)
         with gr.Tab('Run'):
@@ -271,6 +298,11 @@ with gr.Blocks() as demo:
             fn=design_btn_fn, 
             inputs=[protein_for_design], 
             outputs=d_html_structures
+        )
+
+        gr.Examples(
+            examples=["CASRRSG[FTYPGF]FFEQYF"],
+            inputs=protein
         )
             
 
