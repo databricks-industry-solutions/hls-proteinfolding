@@ -1,0 +1,62 @@
+resources:
+  jobs:
+    global_folding_install:
+      name: global_folding_install
+      email_notifications:
+        on_start:
+          - <email>
+        on_success:
+          - <email>
+        on_failure:
+          - <email>
+      tasks:
+        - task_key: esmfold
+          notebook_task:
+            notebook_path: <install_base_path>/tutorials/esmfold/ESMfold_log
+            source: WORKSPACE
+          job_cluster_key: log_and_serve_esmfold_cluster
+        - task_key: downloads_alphafold
+          notebook_task:
+            notebook_path: <install_base_path>/tutorials/alphafold/01_create_downloads_workflow
+            source: WORKSPACE
+        - task_key: alphafold
+          depends_on:
+            - task_key: make_and_run_alphafold_downloads_workflow
+          notebook_task:
+            notebook_path: <install_base_path>/tutorials/alphafold/02_create_alphafold_workflow
+            base_parameters:
+              feature_compute: <af_feature_compute>
+              fold_compute: <af_fold_compute>
+            source: WORKSPACE
+        - task_key: proteinmpnn
+          notebook_task:
+            notebook_path: <install_base_path>/tutorials/proteinmpnn/notebooks/create_and_run_logging_workflow
+            source: WORKSPACE
+      job_clusters:
+        - job_cluster_key: log_and_serve_esmfold_cluster
+          new_cluster:
+            cluster_name: ""
+            spark_version: 15.4.x-scala2.12
+            spark_conf:
+              spark.master: local[*, 4]
+              spark.databricks.cluster.profile: singleNode
+            azure_attributes:
+              first_on_demand: 1
+              availability: ON_DEMAND_AZURE
+              spot_bid_max_price: -1
+            node_type_id: <cpu_compute>
+            custom_tags:
+              ResourceClass: SingleNode
+            spark_env_vars:
+              PYSPARK_PYTHON: /databricks/python3/bin/python3
+            enable_elastic_disk: true
+            data_security_mode: SINGLE_USER
+            runtime_engine: STANDARD
+            num_workers: 0
+      tags:
+        ProteinFolding: ""
+      queue:
+        enabled: true
+      parameters:
+        - name: email
+          default: <email>
