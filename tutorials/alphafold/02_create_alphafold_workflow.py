@@ -84,3 +84,7 @@ try:
     print(f"Created job {job_id}")
 except Exception as e:
     print(f"Job creation failed: {e}")
+
+# COMMAND ----------
+
+

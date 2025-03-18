@@ -33,7 +33,7 @@
 # MAGIC
 # MAGIC source /miniconda3/bin/activate
 # MAGIC
-# MAGIC conda env create -f alphafold_env.yml 
+# MAGIC conda env create -f ../envs/alphafold_env.yml 
 # MAGIC
 # MAGIC mkdir -p /alphafold
 # MAGIC cd /alphafold
@@ -147,7 +147,7 @@ print(os.environ['AF_FASTA_FILE'])
 # MAGIC
 # MAGIC source /miniconda3/bin/activate
 # MAGIC conda activate alphafold_env
-# MAGIC python run_alphafold_split.py ${FLAGS}
+# MAGIC python ../scripts/run_alphafold_split.py ${FLAGS}
 
 # COMMAND ----------
 
