@@ -27,6 +27,11 @@
 
 # COMMAND ----------
 
+# MAGIC %pip install pyyaml
+# MAGIC %restart_python
+
+# COMMAND ----------
+
 # MAGIC %run ./downloads/notebooks/files_setup
 
 # COMMAND ----------
@@ -75,4 +80,45 @@ print(updated_yaml_content)
 
 # COMMAND ----------
 
+from databricks.sdk import WorkspaceClient
+from databricks.sdk.service.jobs import JobSettings
+from typing import Optional
+import yaml
 
+def create_job_from_yaml(yaml_path: Optional[str] = None, yaml_str: Optional[str] = None):
+    if yaml_path is not None:
+        with open(yaml_path) as f:
+            config = yaml.safe_load(f)
+    elif yaml_str is not None:
+        config = yaml.safe_load(yaml_str)
+    else:
+        raise ValueError("Either yaml_path or yaml_str must be provided")
+    
+    outer_name = [k for k in config['resources']['jobs'].keys()][0]
+  
+    # Full job settings deserialization
+    job_settings = JobSettings.from_dict(config['resources']['jobs'][outer_name])
+    
+    # instantiate the client
+    w = WorkspaceClient()
+    
+    # create a job just with name
+    creation_info = w.jobs.create(name='new created job')
+    # now use job settings object to populate
+    w.jobs.reset(
+        job_id=creation_info.job_id,
+        new_settings=job_settings,
+    )
+    return creation_info.job_id
+
+try:
+    job_id = create_job_from_yaml(yaml_str = updated_yaml_content)
+    print(f"Created job {job_id}")
+except Exception as e:
+    print(f"Job creation failed: {e}")
+
+# COMMAND ----------
+
+w = WorkspaceClient()
+# run the job
+w.jobs.run_now(job_id)

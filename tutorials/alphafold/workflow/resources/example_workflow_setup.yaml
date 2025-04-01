@@ -121,7 +121,8 @@ resources:
             runtime_engine: STANDARD
             num_workers: 0
       tags:
-        work_type: protein_folding
+        ProteinFolding: ""
+        ProteinFoldingModel: Alphafold
       queue:
         enabled: true
       parameters:
