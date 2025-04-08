@@ -14,6 +14,9 @@ from Bio.PDB.PDBParser import PDBParser
 from Bio.PDB.PDBIO import PDBIO
 import tempfile
 import base64 
+import json
+import requests
+import time
 
 from structure_utils import select_and_align
 from protein_design import make_designs
@@ -56,6 +59,87 @@ def query_esmfold(protein : str) -> str:
     except Exception as e:
         logger.error(f"Error querying model: {str(e)}", exc_info=True)
         return f"Error: {str(e)}"
+    
+# ------------------------------------------------------------- 
+# ------------BOLTZ FUNCTIONS TO BE CLEANED -------------------
+# ------------------------------------------------------------- 
+
+def _get_sp_token(base_url, sp_id, sp_oauth_token):
+        token_url = f"{base_url}/oidc/v1/token"
+        response = requests.post(
+            token_url,
+            auth=(sp_id, sp_oauth_token),
+            data={'grant_type': 'client_credentials', 'scope': 'all-apis'}
+        )
+        token = response.json().get('access_token')
+        logging.info(f"got token: (first two char are) {token[:2]}")
+        return token
+
+def run_boltz_model(ds_dict):
+    token = _get_sp_token(
+        base_url = 'https://adb-830292400663869.9.azuredatabricks.net',
+        sp_id = os.environ['DATABRICKS_CLIENT_ID'],
+        sp_oauth_token = os.environ['DATABRICKS_CLIENT_SECRET']
+    )
+    url = 'https://adb-830292400663869.9.azuredatabricks.net/serving-endpoints/dbboltz/invocations'
+    headers = {'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'}
+    data_json = json.dumps(ds_dict, allow_nan=True)
+    response = requests.request(method='POST', headers=headers, url=url, data=data_json)
+    logging.info(f"reponse is returned : {response.status_code}")
+    if response.status_code != 200:
+        raise Exception(f'Request failed with status {response.status_code}, {response.text}')
+    return response.json()
+
+def _format_boltz_input(indict):
+    return {
+        'dataframe_split':{
+        "columns": [
+        "input",
+        "msa",
+        "use_msa_server"
+        ],
+        "data": [
+        [
+            indict['input'],
+            indict["msa"],
+            indict["use_msa_server"]
+        ]
+        ]
+    }     
+    }
+
+def query_boltz(protein : str) -> str:
+    """
+    Query Boltz with input sequence
+    """
+    if not protein.strip():
+        return "ERROR: The question should not be empty"
+
+    try:
+        logger.info(f"Sending request to model endpoint: {os.getenv('BOLTZ_SERVING_ENDPOINT')}")
+
+        in_dict = {
+            'input':protein,
+            'msa':'no_msa',
+            'use_msa_server':'False'
+        }
+        in_dict = _format_boltz_input(in_dict)
+        logging.info(f"submitting: {in_dict}")
+        # response = workspace_client.serving_endpoints.query(
+        #     name=os.getenv('BOLTZ_SERVING_ENDPOINT'),
+        #     inputs=[in_dict]
+        # )
+        response = run_boltz_model(in_dict)
+        logger.info("Received response from model endpoint")
+        # return response.predictions[0]['pdb']
+        return response['predictions'][0]['pdb']
+    except Exception as e:
+        logger.error(f"Error querying model: {str(e)}", exc_info=True)
+        return f"Error: {str(e)}"
+
+# ------------------------------------------------------------- 
+# ------------ END BOLTZ FUNCTIONS ---------------------------- 
+# ------------------------------------------------------------- 
 
 def _cif_to_pdb_str(cif_str:str)->str:
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -92,6 +176,11 @@ def pdb_btn_fn(protein : str) -> str:
         pdb = query_esmfold(protein)
     else:
         pdb = dummy_pdb()
+    html =  molstar_html_multibody(pdb)
+    return html
+
+def boltz_btn_fn(protein : str) -> str:
+    pdb_run = query_boltz(protein)
     html =  molstar_html_multibody(pdb_run)
     return html
 
@@ -243,7 +332,7 @@ with gr.Blocks(theme=theme, js=js_func) as demo:
             with gr.Accordion("Details", open=False) as accordion:
                 gr.Markdown("""
                     #### Run Details
-                    Submits a job run on [this workflow](https://adb-830292400663869.9.azuredatabricks.net/jobs/32119039305501?o=830292400663869). run_name can be any anme you like. For multimers use ":" to split chains. Runs can be picked up in Unity catalog [here](https://adb-830292400663869.9.azuredatabricks.net/explore/data/volumes/protein_folding/alphafold/results?o=830292400663869). 
+                    Submits a job run on [this workflow](https://adb-830292400663869.9.azuredatabricks.net/jobs/20051695282124?o=830292400663869). run_name can be any anme you like. For multimers use ":" to split chains. Runs can be picked up in Unity catalog [here](https://adb-830292400663869.9.azuredatabricks.net/explore/data/volumes/protein_folding/alphafold/results?o=830292400663869). 
                 """)
             with gr.Row():
                 run_name_submit = gr.Textbox(label="run name",scale=1)
@@ -286,7 +375,7 @@ with gr.Blocks(theme=theme, js=js_func) as demo:
             """)
         with gr.Row():
             protein_for_design = gr.Textbox(label="Protein",scale=4)
-            n_designs = gr.Textbox(label="number of designs",scale=4)
+            # n_designs = gr.Textbox(label="number of designs",scale=4)
             design_btn = gr.Button("Predict", scale=1)
 
         if not ASTEXT:
@@ -302,7 +391,44 @@ with gr.Blocks(theme=theme, js=js_func) as demo:
 
         gr.Examples(
             examples=["CASRRSG[FTYPGF]FFEQYF"],
-            inputs=protein
+            inputs=protein_for_design,
+        )
+    with gr.Tab('Boltz-1'):
+        gr.Markdown(
+        """
+        # Protein Structure Prediction with Boltz-1
+
+        """)
+        with gr.Accordion("Details", open=False) as accordion:
+            gr.Markdown("""
+                #### Details
+                Enter a protein sequence and view the structure. 
+                Use format: protein_A:sequence;protein_B,C:sequence
+                 - this input UX will be improved soon
+                 - types are protein, dna, rna, ligand
+                 - chain ids should be comma separated if more than one
+
+                options for other MSA fields etc and easy add of non protein objects to be added.
+
+            """)
+        with gr.Row():
+            protein_boltz = gr.Textbox(label="Protein",scale=4)
+            btn_boltz = gr.Button("Predict", scale=1)
+
+        if not ASTEXT:
+            html_structure_boltz = gr.HTML(label="Structure")
+        else:
+            html_structure_boltz = gr.Textbox(label="Structure")
+        btn_boltz.click(
+            fn=boltz_btn_fn, 
+            inputs=protein_boltz, 
+            outputs=html_structure_boltz
+        )
+        gr.Examples(
+            examples=[
+                "protein_A:SRALEEGRERLLWRLEPARGLEPPVVLVQTLTEPDWSVLDEGYAQVFPPKPFHPALKPGQRLRFRLRANPAKRLAATGKRVALKTPAEKVAWLERRLEEGGFRLLEGERGPWVQ;rna_B:UCCCCACGCGUGUGGGGAU"
+            ],
+            inputs=protein_boltz
         )
             
 

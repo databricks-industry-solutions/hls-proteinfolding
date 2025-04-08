@@ -76,6 +76,13 @@ proteinmpnn_resource = AppResource(
         permission = AppResourceServingEndpointServingEndpointPermission['CAN_QUERY']
     )
 )
+boltz_resource = AppResource(
+    name = 'serving-endpoint',
+    serving_endpoint=AppResourceServingEndpoint(
+        name = 'dbboltz',
+        permission = AppResourceServingEndpointServingEndpointPermission['CAN_QUERY']
+    )
+)
 
 notebook_path = dbutils.notebook.entry_point.getDbutils().notebook().getContext().notebookPath().get()
 src_dir = '/Workspace'+'/'.join(notebook_path.split('/')[:-1])+'/src'
@@ -88,13 +95,14 @@ my_app = App(
         af2_resource,
         esmfold_resource,
         rfdiffusion_resource,
-        proteinmpnn_resource
+        proteinmpnn_resource,
+        boltz_resource
     ],
 )
 
 # COMMAND ----------
 
-# w.apps.create_and_wait(app=my_app)
+w.apps.create_and_wait(app=my_app)
 
 deployment = w.apps.deploy_and_wait(
     app_name=my_app.name,
@@ -114,16 +122,15 @@ a.service_principal_name
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC # this errors out right now - I think the service principal is created at metastore not workspace and this can create issues?
-# MAGIC  - it works to do it in UI (needs workspace admin?)
+# MAGIC ### Ensure permissions are given to the Service Principal on the alphafold volumes to read results and downloaded datasets (eg PDB)
 
 # COMMAND ----------
 
 # assign read permissions on protein_folding.alphafold.datasets and protein_folding.alphafold.results with sql statements
-# spark.sql(f"GRANT USE CATALOG ON CATALOG protein_folding TO `{a.service_principal_name}`")
-# spark.sql(f"GRANT USE SCHEMA ON SCHEMA protein_folding.alphafold TO `{a.service_principal_name}`")
-# spark.sql(f"GRANT READ VOLUME ON VOLUME protein_folding.alphafold.datasets TO `{a.service_principal_name}`")
-# spark.sql(f"GRANT READ VOLUME ON VOLUME protein_folding.alphafold.results TO `{a.service_principal_name}`")
+spark.sql(f"GRANT USE CATALOG ON CATALOG protein_folding TO `{a.service_principal_client_id}`")
+spark.sql(f"GRANT USE SCHEMA ON SCHEMA protein_folding.alphafold TO `{a.service_principal_client_id}`")
+spark.sql(f"GRANT READ VOLUME ON VOLUME protein_folding.alphafold.datasets TO `{a.service_principal_client_id}`")
+spark.sql(f"GRANT READ VOLUME ON VOLUME protein_folding.alphafold.results TO `{a.service_principal_client_id}`")
 
 # COMMAND ----------
 
