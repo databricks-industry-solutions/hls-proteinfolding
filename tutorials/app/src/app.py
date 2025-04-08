@@ -176,7 +176,7 @@ def pdb_btn_fn(protein : str) -> str:
         pdb = query_esmfold(protein)
     else:
         pdb = dummy_pdb()
-    html =  molstar_html_multibody(pdb_run)
+    html =  molstar_html_multibody(pdb)
     return html
 
 def boltz_btn_fn(protein : str) -> str:
@@ -332,7 +332,7 @@ with gr.Blocks(theme=theme, js=js_func) as demo:
             with gr.Accordion("Details", open=False) as accordion:
                 gr.Markdown("""
                     #### Run Details
-                    Submits a job run on [this workflow](https://adb-830292400663869.9.azuredatabricks.net/jobs/32119039305501?o=830292400663869). run_name can be any anme you like. For multimers use ":" to split chains. Runs can be picked up in Unity catalog [here](https://adb-830292400663869.9.azuredatabricks.net/explore/data/volumes/protein_folding/alphafold/results?o=830292400663869). 
+                    Submits a job run on [this workflow](https://adb-830292400663869.9.azuredatabricks.net/jobs/20051695282124?o=830292400663869). run_name can be any anme you like. For multimers use ":" to split chains. Runs can be picked up in Unity catalog [here](https://adb-830292400663869.9.azuredatabricks.net/explore/data/volumes/protein_folding/alphafold/results?o=830292400663869). 
                 """)
             with gr.Row():
                 run_name_submit = gr.Textbox(label="run name",scale=1)
