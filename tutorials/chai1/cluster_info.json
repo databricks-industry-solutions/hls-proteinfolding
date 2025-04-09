@@ -1,0 +1,23 @@
+{
+    "cluster_name": "mmt_testing_15.4LTS_gpuA100",
+    "spark_version": "15.4.x-gpu-ml-scala2.12",
+    "azure_attributes": {
+        "first_on_demand": 1,
+        "availability": "SPOT_WITH_FALLBACK_AZURE",
+        "spot_bid_max_price": -1
+    },
+    "node_type_id": "Standard_NC24ads_A100_v4",
+    "custom_tags": {
+        "proteinfolding_testing": "True",
+        "Nvidia_collab_related": "True",
+        "removeAfter": "2026-01-31"
+    },
+    "autotermination_minutes": 120,
+    "single_user_name": "may.merkletan@databricks.com",
+    "data_security_mode": "SINGLE_USER",
+    "runtime_engine": "STANDARD",
+    "autoscale": {
+        "min_workers": 2,
+        "max_workers": 8
+    }
+}
