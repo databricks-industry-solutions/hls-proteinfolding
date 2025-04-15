@@ -7,7 +7,7 @@ The ability to computationally predict the 3D structure of proteins with near ex
 **Structure Prediction Models:**
 - AlphaFold v2.3.2: uses Databricks workflows to download required datasets and can install workflows for separated CPU and GPU compute.
 - ESMFold: model serving of ESMFold
-- Coming soon: Boltz-1
+- Boltz-1: Model serving of Boltz-1
 
 **Generative Protein Modelling Tools:**
 - RFDiffusion: model serving of unconditional protein generation and in-painting protein generation
