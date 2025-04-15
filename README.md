@@ -97,3 +97,7 @@ Boltz-1 | sentence-transformers>=2.7 |	Apache2.0 | https://github.com/UKPLab/sen
 Boltz-1 | pyspark |	Apache2.0 | https://github.com/apache/spark
 Boltz-1 | pandas |	BSD-3 | https://github.com/pandas-dev/pandas
 Boltz-1 | MODEL WEIGHTS |	MIT | https://github.com/jwohlwend/boltz
+App | gradio | Apache2.0 | https://github.com/gradio-app/gradio
+App | databricks-sdk>=0.1.0 | Apache2.0 | https://pypi.org/project/databricks-sdk/
+App | py3Dmol==2.4.0 | MIT | TOBEREMOVED (https://pypi.org/project/py3Dmol/)
+App | biopython |	https://github.com/biopython/biopython/blob/master/LICENSE.rst | https://github.com/biopython/biopython
