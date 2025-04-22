@@ -1,0 +1,138 @@
+resources:
+  jobs:
+    folding_setup:
+      name: folding_setup
+      email_notifications:
+        on_success:
+          - <email>
+        on_failure:
+          - <email>
+        no_alert_for_skipped_runs: true
+      notification_settings:
+        no_alert_for_skipped_runs: true
+        no_alert_for_canceled_runs: true
+      tasks:
+        - task_key: protein_mpnn_download_weights
+          notebook_task:
+            notebook_path: <root_path>/proteinmpnn/notebooks/00_download_model_weights
+            source: WORKSPACE
+          job_cluster_key: proteinmpnn_setup
+        - task_key: protein_mpnn_generate_examples
+          depends_on:
+            - task_key: protein_mpnn_download_weights
+          notebook_task:
+            notebook_path: <root_path>/proteinmpnn/notebooks/01_prep_example_inputs
+            source: WORKSPACE
+          job_cluster_key: proteinmpnn_setup
+        - task_key: protein_mpnn_log_model
+          depends_on:
+            - task_key: protein_mpnn_generate_examples
+          notebook_task:
+            notebook_path: <root_path>/proteinmpnn/notebooks/02_log_proteinmpnn
+            source: WORKSPACE
+          job_cluster_key: proteinmpnn_setup
+        - task_key: esmfold_serve
+          notebook_task:
+            notebook_path: <root_path>/esmfold/ESMfold_log
+            source: WORKSPACE
+          job_cluster_key: esmfold_serve_cluster
+        - task_key: rfdiffusion_log
+          notebook_task:
+            notebook_path: <root_path>/rfdiffusion/rfdiffusion_log
+            source: WORKSPACE
+          job_cluster_key: rfdiffusion_serve_cluster
+        - task_key: boltz
+          depends_on:
+            - task_key: rfdiffusion_log
+          notebook_task:
+            notebook_path: <root_path>/boltz/notebooks/make_pyfunc
+            source: WORKSPACE
+          job_cluster_key: rfdiffusion_serve_cluster
+        - task_key: make_app
+          depends_on:
+            - task_key: esmfold_serve
+            - task_key: boltz
+            - task_key: rfdiffusion_serve
+            - task_key: protein_mpnn_log_model
+          notebook_task:
+            notebook_path: <root_path>/app/01_create_app_with_sdk
+            source: WORKSPACE
+        - task_key: rfdiffusion_serve
+          depends_on:
+            - task_key: rfdiffusion_log
+          notebook_task:
+            notebook_path: <root_path>/rfdiffusion/serve_rfdiffusion
+            source: WORKSPACE
+        - task_key: protein_mpnn_serve
+          depends_on:
+            - task_key: protein_mpnn_log_model
+          notebook_task:
+            notebook_path: <root_path>/proteinmpnn/notebooks/04_serve_proteinmpnn
+            source: WORKSPACE
+        - task_key: boltz_serve
+          depends_on:
+            - task_key: boltz
+          notebook_task:
+            notebook_path: <root_path>/boltz/notebooks/serve_boltz
+            source: WORKSPACE
+      job_clusters:
+        - job_cluster_key: proteinmpnn_setup
+          new_cluster:
+            cluster_name: ""
+            spark_version: 15.4.x-gpu-ml-scala2.12
+            spark_conf:
+              spark.master: local[*, 4]
+              spark.databricks.cluster.profile: singleNode
+            azure_attributes:
+              first_on_demand: 1
+              availability: ON_DEMAND_AZURE
+              spot_bid_max_price: -1
+            node_type_id: Standard_NC4as_T4_v3
+            driver_node_type_id: Standard_NC4as_T4_v3
+            custom_tags:
+              ResourceClass: SingleNode
+            enable_elastic_disk: true
+            data_security_mode: SINGLE_USER
+            runtime_engine: STANDARD
+            num_workers: 0
+        - job_cluster_key: esmfold_serve_cluster
+          new_cluster:
+            spark_version: 15.4.x-cpu-ml-scala2.12
+            spark_conf:
+              spark.master: local[*, 4]
+              spark.databricks.cluster.profile: singleNode
+            azure_attributes:
+              first_on_demand: 1
+              availability: SPOT_WITH_FALLBACK_AZURE
+              spot_bid_max_price: -1
+            node_type_id: Standard_D4ds_v5
+            custom_tags:
+              ResourceClass: SingleNode
+            enable_elastic_disk: true
+            data_security_mode: SINGLE_USER
+            runtime_engine: STANDARD
+            num_workers: 0
+        - job_cluster_key: rfdiffusion_serve_cluster
+          new_cluster:
+            cluster_name: ""
+            spark_version: 14.3.x-gpu-ml-scala2.12
+            spark_conf:
+              spark.master: local[*, 4]
+              spark.databricks.cluster.profile: singleNode
+            azure_attributes:
+              first_on_demand: 1
+              availability: SPOT_WITH_FALLBACK_AZURE
+              spot_bid_max_price: -1
+            node_type_id: Standard_NC4as_T4_v3
+            driver_node_type_id: Standard_NC4as_T4_v3
+            custom_tags:
+              ResourceClass: SingleNode
+            enable_elastic_disk: true
+            data_security_mode: SINGLE_USER
+            runtime_engine: STANDARD
+            num_workers: 0
+      tags:
+        ProteinFolding: ""
+      queue:
+        enabled: false
+

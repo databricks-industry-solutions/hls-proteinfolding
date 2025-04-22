@@ -3,8 +3,4 @@ tasks:
   alphafold: true
   esmfold: true
   proteinmpnn: true
-compute:
-  alphafold_download_compute: ""
-  alphafold_featurize_compute: ""
-  alphafold_fold_compute: ""
-  esmfold_register_compute: ""
+  
