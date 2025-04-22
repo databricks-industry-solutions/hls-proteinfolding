@@ -153,7 +153,8 @@ resources:
             - task_key: esmfold_serve
             - task_key: boltz
             - task_key: rfdiffusion_serve
-            - task_key: protein_mpnn_log_model
+            - task_key: protein_mpnn_serve
+            - task_key: boltz_serve
           notebook_task:
             notebook_path: <root_path>/app/01_create_app_with_sdk
             source: WORKSPACE
