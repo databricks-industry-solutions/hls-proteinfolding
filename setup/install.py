@@ -162,7 +162,7 @@ except TimeoutError:
 
 # COMMAND ----------
 
-default_yaml_path = "/Workspace"+directory_path+"/../tutorials/alphafold"+"/downloads/resources/example_workflow_setup.yaml"
+default_yaml_path = str(Path("/Workspace"+directory_path+"/../tutorials/alphafold"+"/downloads/resources/downloads_workflow.yaml").resolve())
 afdl_notebooks_path = str(Path("/Workspace"+directory_path+"/../tutorials/alphafold"+"/downloads/notebooks").resolve())
 with open(default_yaml_path, 'r') as file:
     yaml_content = file.read()
@@ -184,3 +184,7 @@ if download_af2_datasets:
   except TimeoutError:
     # expect 20min timeout on notebook call - the actual workflow will still run fine
     pass
+
+# COMMAND ----------
+
+

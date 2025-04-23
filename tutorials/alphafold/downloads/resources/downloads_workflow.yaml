@@ -1,7 +1,7 @@
 resources:
   jobs:
-    AF2_downloads_new:
-      name: AF2_downloads_new
+    AF2_downloads:
+      name: AF2_downloads
       email_notifications:
         on_success:
           - <email>
