@@ -1,4 +1,4 @@
-# Setup Protein folding on Databricks
+# Setup Protein Folding on Databricks
 
 Simple single notebook install of all models, provisioning model serving endpoints (with scale to zero on so they do not cost while idle), and an application for hosting the models in a UI. Optionally download alphafold2 datasets with flag in the install notebooks.
 
