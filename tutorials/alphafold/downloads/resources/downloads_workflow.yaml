@@ -1,0 +1,224 @@
+resources:
+  jobs:
+    AF2_downloads_new:
+      name: AF2_downloads_new
+      email_notifications:
+        on_success:
+          - <email>
+        on_failure:
+          - <email>
+        no_alert_for_skipped_runs: true
+      notification_settings:
+        no_alert_for_skipped_runs: true
+        no_alert_for_canceled_runs: true
+      tasks:
+        - task_key: download_mgnifyPLUS
+          notebook_task:
+            notebook_path: <notebooks_path>/download_mgnify_smallbfd_pdb70_pdbseqres
+            source: WORKSPACE
+          job_cluster_key: download_mgnifyPLUS_cluster
+          health:
+            rules:
+              - metric: RUN_DURATION_SECONDS
+                op: GREATER_THAN
+                value: 14400
+          email_notifications:
+            on_success:
+              - <email>
+            on_failure:
+              - <email>
+            on_duration_warning_threshold_exceeded:
+              - <email>
+          notification_settings:
+            no_alert_for_skipped_runs: true
+            no_alert_for_canceled_runs: true
+        - task_key: download_params
+          notebook_task:
+            notebook_path: <notebooks_path>/download_params
+            source: WORKSPACE
+          job_cluster_key: download_params_cluster
+          timeout_seconds: 7200
+          health:
+            rules:
+              - metric: RUN_DURATION_SECONDS
+                op: GREATER_THAN
+                value: 3600
+          email_notifications:
+            on_success:
+              - <email>
+            on_failure:
+              - <email>
+            on_duration_warning_threshold_exceeded:
+              - <email>
+          notification_settings:
+            no_alert_for_skipped_runs: true
+            no_alert_for_canceled_runs: true
+        - task_key: download_uniprot
+          notebook_task:
+            notebook_path: <notebooks_path>/download_uniprot
+            source: WORKSPACE
+          job_cluster_key: download_uniprot_cluster
+          timeout_seconds: 21600
+          health:
+            rules:
+              - metric: RUN_DURATION_SECONDS
+                op: GREATER_THAN
+                value: 14400
+          email_notifications:
+            on_success:
+              - <email>
+            on_failure:
+              - <email>
+            on_duration_warning_threshold_exceeded:
+              - <email>
+          notification_settings:
+            no_alert_for_skipped_runs: true
+            no_alert_for_canceled_runs: true
+        - task_key: download_unirefs
+          notebook_task:
+            notebook_path: <notebooks_path>/download_uniref90_uniref30
+            source: WORKSPACE
+          job_cluster_key: download_unirefs_cluster
+          timeout_seconds: 36000
+          health:
+            rules:
+              - metric: RUN_DURATION_SECONDS
+                op: GREATER_THAN
+                value: 12600
+          email_notifications:
+            on_success:
+              - <email>
+            on_failure:
+              - <email>
+            on_duration_warning_threshold_exceeded:
+              - <email>
+          notification_settings:
+            no_alert_for_skipped_runs: true
+            no_alert_for_canceled_runs: true
+        - task_key: pdb_mmcif
+          notebook_task:
+            notebook_path: <notebooks_path>/download_pdb_mmcif
+            source: WORKSPACE
+          job_cluster_key: pdb_mmcif_cluster
+          health:
+            rules:
+              - metric: RUN_DURATION_SECONDS
+                op: GREATER_THAN
+                value: 43200
+          email_notifications:
+            on_success:
+              - <email>
+            on_failure:
+              - <email>
+            on_duration_warning_threshold_exceeded:
+              - <email>
+      job_clusters:
+        - job_cluster_key: download_params_cluster
+          new_cluster:
+            cluster_name: ""
+            spark_version: 15.4.x-scala2.12
+            spark_conf:
+              spark.master: local[*, 4]
+              spark.databricks.cluster.profile: singleNode
+            azure_attributes:
+              first_on_demand: 1
+              availability: ON_DEMAND_AZURE
+              spot_bid_max_price: -1
+            node_type_id: Standard_F8
+            driver_node_type_id: Standard_F8
+            custom_tags:
+              ResourceClass: SingleNode
+            spark_env_vars:
+              PYSPARK_PYTHON: /databricks/python3/bin/python3
+            enable_elastic_disk: true
+            data_security_mode: SINGLE_USER
+            runtime_engine: STANDARD
+            num_workers: 0
+        - job_cluster_key: download_unirefs_cluster
+          new_cluster:
+            cluster_name: ""
+            spark_version: 15.4.x-scala2.12
+            spark_conf:
+              spark.master: local[*, 4]
+              spark.databricks.cluster.profile: singleNode
+            azure_attributes:
+              first_on_demand: 1
+              availability: ON_DEMAND_AZURE
+              spot_bid_max_price: -1
+            node_type_id: Standard_F8
+            driver_node_type_id: Standard_F8
+            custom_tags:
+              ResourceClass: SingleNode
+            spark_env_vars:
+              PYSPARK_PYTHON: /databricks/python3/bin/python3
+            enable_elastic_disk: true
+            data_security_mode: SINGLE_USER
+            runtime_engine: STANDARD
+            num_workers: 0
+        - job_cluster_key: download_mgnifyPLUS_cluster
+          new_cluster:
+            cluster_name: ""
+            spark_version: 15.4.x-scala2.12
+            spark_conf:
+              spark.master: local[*, 4]
+              spark.databricks.cluster.profile: singleNode
+            azure_attributes:
+              first_on_demand: 1
+              availability: ON_DEMAND_AZURE
+              spot_bid_max_price: -1
+            node_type_id: Standard_F8
+            driver_node_type_id: Standard_F8
+            custom_tags:
+              ResourceClass: SingleNode
+            spark_env_vars:
+              PYSPARK_PYTHON: /databricks/python3/bin/python3
+            enable_elastic_disk: true
+            data_security_mode: SINGLE_USER
+            runtime_engine: STANDARD
+            num_workers: 0
+        - job_cluster_key: download_uniprot_cluster
+          new_cluster:
+            cluster_name: ""
+            spark_version: 15.4.x-scala2.12
+            spark_conf:
+              spark.master: local[*, 4]
+              spark.databricks.cluster.profile: singleNode
+            azure_attributes:
+              first_on_demand: 1
+              availability: ON_DEMAND_AZURE
+              spot_bid_max_price: -1
+            node_type_id: Standard_F8
+            driver_node_type_id: Standard_F8
+            custom_tags:
+              ResourceClass: SingleNode
+            spark_env_vars:
+              PYSPARK_PYTHON: /databricks/python3/bin/python3
+            enable_elastic_disk: true
+            data_security_mode: SINGLE_USER
+            runtime_engine: STANDARD
+            num_workers: 0
+        - job_cluster_key: pdb_mmcif_cluster
+          new_cluster:
+            spark_version: 15.4.x-scala2.12
+            spark_conf:
+              spark.master: local[*, 4]
+              spark.databricks.cluster.profile: singleNode
+            azure_attributes:
+              first_on_demand: 1
+              availability: ON_DEMAND_AZURE
+              spot_bid_max_price: -1
+            node_type_id: Standard_F8
+            driver_node_type_id: Standard_F8
+            custom_tags:
+              ResourceClass: SingleNode
+            spark_env_vars:
+              PYSPARK_PYTHON: /databricks/python3/bin/python3
+            enable_elastic_disk: true
+            data_security_mode: SINGLE_USER
+            runtime_engine: STANDARD
+            num_workers: 0
+      tags:
+        ProteinFolding: ""
+        ProteinFoldingModel: Alphafold
+      queue:
+        enabled: true
