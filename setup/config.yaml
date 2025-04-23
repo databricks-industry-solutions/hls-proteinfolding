@@ -1,6 +1,0 @@
-tasks:
-  downloads_alphafold: false
-  alphafold: true
-  esmfold: true
-  proteinmpnn: true
-  
