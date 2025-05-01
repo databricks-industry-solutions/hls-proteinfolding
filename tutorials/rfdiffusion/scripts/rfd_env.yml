@@ -2,6 +2,7 @@ name: SE3nv
 channels:
   - conda-forge
   - nvidia
+  - nodefaults
 dependencies:
   - python=3.10
   - nvidia::cudatoolkit=11.3

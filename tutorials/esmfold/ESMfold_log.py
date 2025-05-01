@@ -243,7 +243,7 @@ try:
     )
 except errors.platform.ResourceDoesNotExist as e:
     # if no endpoint yet, make it, wait for it to spin up, and put model on endpoint
-    status = w.serving_endpoints.create_and_wait(
+    status = w.serving_endpoints.create(
         name=endpoint_name,
         config=EndpointCoreConfigInput(
             name=endpoint_name,
