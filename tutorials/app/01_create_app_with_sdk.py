@@ -42,7 +42,9 @@ def get_job_id(job_name : str ='alphafold'):
         if len(found_jobs)==0:
             raise ValueError("No job with name", job_name)
         else:
-            raise NotImplementedError("Multiple jobs with the same name found", [j.job_id for j in found_jobs])
+            print("Warning: multiple jobs with the same name found, using latest")
+            found_job = sorted(found_jobs, key=lambda j: j.created_time, reverse=True)[0]
+            # raise NotImplementedError("Multiple jobs with the same name found", [j.job_id for j in found_jobs])
     return found_job.job_id
 
 # make a resource that will allow the app to access the alphafold job
@@ -65,7 +67,7 @@ esmfold_resource = AppResource(
 rfdiffusion_resource = AppResource(
     name = 'serving-endpoint',
     serving_endpoint=AppResourceServingEndpoint(
-        name = 'rfdiffusion_inpaint',
+        name = 'rfdiffusion_inpainting',
         permission = AppResourceServingEndpointServingEndpointPermission['CAN_QUERY']
     )
 )
@@ -79,7 +81,7 @@ proteinmpnn_resource = AppResource(
 boltz_resource = AppResource(
     name = 'serving-endpoint',
     serving_endpoint=AppResourceServingEndpoint(
-        name = 'dbboltz',
+        name = 'boltz',
         permission = AppResourceServingEndpointServingEndpointPermission['CAN_QUERY']
     )
 )
