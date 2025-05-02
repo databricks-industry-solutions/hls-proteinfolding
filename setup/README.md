@@ -9,5 +9,11 @@ Simple single notebook install of all models, provisioning model serving endpoin
     - if you already have a copy elsewhere you can copy them over 
     - or create an external volume, though you'll need to modify the paths in the alphafold running notebook to change where to look for the databases.
 
+The install notebook will generate a workflow "folding setup", and will look like this:
+
+<br>
+<img src="../static/install_workflow.png" alt="workflow install" width="700">
+<br>
+
 ## Uninstall
 - Cleanup notebook will delete models, workflows, catalog objects, and the app
