@@ -23,14 +23,14 @@ from mlflow.types.schema import ColSpec, Schema
 from typing import Any, Dict, List, Optional
 
 import logging
-# logging.basicConfig()
-# logging.getLogger().setLevel(logging.INFO)
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ##### consider : initialize_config_dir()
-# MAGIC  - use absolute not relative path...
+# MAGIC ## Model definition for RFDiffusion for Unconstrained Problem
+# MAGIC  - this is for predicting a backbone with only the protein legth being a constraint.
+# MAGIC  - We use the mlflow PythonModel as the base class
+# MAGIC  - Although RFDiffusion expects to run from command line, we set Hydra config within python to be able to run the main function from within our python code
 
 # COMMAND ----------
 
@@ -143,6 +143,11 @@ class RFDiffusionUnconditional(mlflow.pyfunc.PythonModel):
         plen = int(model_input[0])
         pdb = self._run_inference(plen)
         return pdb
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Inpainting version of RFDiffusion
 
 # COMMAND ----------
 
@@ -276,6 +281,11 @@ class RFDiffusionInpainting(mlflow.pyfunc.PythonModel):
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC ### Test the Unconditioned version
+
+# COMMAND ----------
+
 model = RFDiffusionUnconditional()
 repo_path = '/Volumes/protein_folding/rfdiffusion/repo_w_models/RFdiffusion/'
 artifacts={
@@ -359,6 +369,13 @@ pdbs[0].split('\n')[:10]
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC ## Begin the Model registration
+# MAGIC  - first set input examples (to keep with the model)
+# MAGIC  - and the model signatures
+
+# COMMAND ----------
+
 signature = mlflow.models.signature.ModelSignature(
     inputs = Schema([ColSpec(type="string")]),
     outputs = Schema([ColSpec(type="string")]),
@@ -379,6 +396,11 @@ inpaint_signature = mlflow.models.infer_signature(
     model.predict(context, input_example)
 )
 print(inpaint_signature)
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ### Perform the model registration
 
 # COMMAND ----------
 

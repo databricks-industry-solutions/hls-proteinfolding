@@ -1,4 +1,9 @@
 # Databricks notebook source
+# MAGIC %md
+# MAGIC ## Download MGNIFY, small_bfd, pdb70 and pdb_seqres datasets
+
+# COMMAND ----------
+
 # MAGIC %run ./download_setup
 
 # COMMAND ----------
