@@ -8,7 +8,7 @@
 
 # COMMAND ----------
 
-# MAGIC %pip install -r scripts/rfd_requirements.txt
+# MAGIC %pip install -r envs/rfd_requirements.txt
 # MAGIC # identical pip reqs to the conda env will use to log the model (but without cudatoolkit)
 # MAGIC # allows to test in 14.3ML, and serve on serving with correct CUDA version
 # MAGIC dbutils.library.restartPython()
@@ -420,7 +420,7 @@ with mlflow.start_run(run_name='rfdiffusion_unconditional'):
         },
         input_example=["100"],
         signature=signature,
-        conda_env='scripts/rfd_env.yml',
+        conda_env='envs/rfd_env.yml',
         registered_model_name="protein_folding.rfdiffusion.rfdiffusion_unconditional"
     )
 
@@ -436,7 +436,7 @@ with mlflow.start_run(run_name='rfdiffusion_inpainting'):
         },
         input_example=input_example,
         signature=inpaint_signature,
-        conda_env='scripts/rfd_env.yml',
+        conda_env='envs/rfd_env.yml',
         registered_model_name="protein_folding.rfdiffusion.rfdiffusion_inpainting"
     )
 
