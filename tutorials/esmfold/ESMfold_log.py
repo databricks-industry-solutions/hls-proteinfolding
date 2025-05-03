@@ -39,8 +39,10 @@ CATALOG = 'protein_folding'
 SCHEMA = 'esmfold'
 MODEL_NAME = 'esmfold'
 
-spark.sql(f"CREATE CATALOG IF NOT EXISTS {CATALOG}")
-spark.sql(f"CREATE SCHEMA IF NOT EXISTS {CATALOG}.{SCHEMA};")
+# uncomment if not using the default install script and have admin priveleges
+# other =wise you cna also select a catalog and schema of your choice
+# spark.sql(f"CREATE CATALOG IF NOT EXISTS {CATALOG}")
+# spark.sql(f"CREATE SCHEMA IF NOT EXISTS {CATALOG}.{SCHEMA};")
 
 # COMMAND ----------
 

@@ -63,7 +63,6 @@ resources:
         - task_key: make_app
           depends_on:
             - task_key: esmfold_serve
-            - task_key: boltz
             - task_key: rfdiffusion_serve
             - task_key: protein_mpnn_serve
             - task_key: boltz_serve
@@ -80,7 +79,7 @@ resources:
           depends_on:
             - task_key: protein_mpnn_log_model
           notebook_task:
-            notebook_path: <root_path>/proteinmpnn/notebooks/04_serve_proteinmpnn
+            notebook_path: <root_path>/proteinmpnn/notebooks/03_serve_proteinmpnn
             source: WORKSPACE
         - task_key: boltz_serve
           depends_on:

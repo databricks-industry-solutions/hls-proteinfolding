@@ -4,7 +4,7 @@
 # MAGIC
 # MAGIC - This notebook sets up the environment for running Alphafold v2.3.2.
 # MAGIC - It installs Miniconda and creates a conda environment from a YAML file.
-# MAGIC - This is note normally recommended for distributed workloads, but since we will distribute via Workflows and each job runs on 8-16 cores max, single worker is reasonable here 
+# MAGIC - This is not normally recommended for distributed workloads, but since we will distribute via Workflows and each job runs on 8-16 cores max, single worker is reasonable here 
 # MAGIC - The notebook clones the Alphafold repository and checks out version 2.3.2.
 # MAGIC   - We use a (Databricks) modified version of the alphafold run script that can run either featurization or folding inpdendently
 # MAGIC   - this is essential for splitting CPU and GPU tasks for efficiency
@@ -123,19 +123,3 @@ print(os.environ['AF_FASTA_FILE'])
 # MAGIC python ../scripts/run_alphafold_split.py ${FLAGS}
 # MAGIC
 # MAGIC cp ${AF_FASTA_FILE} "${OUTDIR}/$(basename "$AF_FASTA_FILE" .fasta)/"
-
-# COMMAND ----------
-
-# there is a minor bug in AF2 (I (pgh) believe) for some cases
-# GIVEQCCTSICSLYQLENYCN:FVNQHLCGSHLVEALYLVCGERGFFYTPKA
-# fails due to an internal error, which should just be a warning, but
-# actually causes an error due to %.2f ona None variable in the error message
-
-# error from U in a non exact template match
-
-# patch 785-790 of templates.py to fix
-# simply 
-# try: 
-#   error = current error, 
-# except Error as e: 
-#   error = 'Warning: template feature extraction on single hit failed, attempting to create empty template and continue job.'

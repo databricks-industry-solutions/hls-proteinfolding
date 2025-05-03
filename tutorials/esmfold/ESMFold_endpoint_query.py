@@ -3,10 +3,7 @@
 # MAGIC ## Place queries against ESMfold served model endpoint and make structure predictions
 # MAGIC
 # MAGIC #### The code below can run anywhere - just need the URL of your Databricks instance and a token
-# MAGIC TODO: add link
-# MAGIC  - There are several ways to set up access to the serving endpoints from outside Databricks:
-# MAGIC    - Create a personal access token in your user settings
-# MAGIC    - Set up OAuth
+# MAGIC
 
 # COMMAND ----------
 

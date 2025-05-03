@@ -7,7 +7,6 @@ import numpy as np
 from typing import Optional, Union, Dict, List, Tuple, Callable, Any
 from rdkit import Chem
 import re
-from databricks.vector_search.client import VectorSearchClient, VectorSearchIndex
 import mlflow
 from collections import defaultdict
 
@@ -300,7 +299,6 @@ def run_boltz(
     Args:
         sequences : Dict with optional keys: ['protein', 'ligand', 'dna', 'rna'], and values lists of tuples (ids, sequence), ids is a tuple of ids
         config : A dictionary of model configuration parameters.
-        idx : A VectorSearchIndex object.
     """
     
     with tempfile.NamedTemporaryFile(suffix='.yaml') as f, \

@@ -1,6 +1,7 @@
 # Databricks notebook source
 # MAGIC %md
 # MAGIC ### Create the specification of a workflow job for alphafold
+# MAGIC  - **NOTE: you can perform (preferred) this install directly from the main repo install notebook**
 # MAGIC  - put your email below to recieve notifications in the workflow (you can add more emails later in the UI if desired)
 # MAGIC  - run this notebook
 # MAGIC  - copy the yaml output in the last cell

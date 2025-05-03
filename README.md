@@ -1,6 +1,9 @@
 # Protein Folding and Generative Protein Models on Databricks
 
-The ability to computationally predict the 3D structure of proteins with near experimental accuracy is revolutionizing bioinformatics research and the way drug discovery is done. The release of AlphaFold2 by DeepMind, which won the CASP14 competition, and RoseTTAFold from the Baker Lab were the first such models to demonstrate such high performance and played a key role in the decision to award three of the researchers involved in these works the 2024 Nobel Prize in Chemistry. Many biotech and pharmaceutical organizations are using these models, including generative models for protein design, to reimagine how AI can shape their R&D businesses. Use cases include not only predicting structures to speed up analysis but also for downstream prediction of molecule properties, drug-binding, and perhaps most excitingly, generating new drugs against targets. We show how model serving, workflows, and apps on Databricks allow one to have an all-in-one platform for both protein folding and even generative protein design with a variety of cutting-edge models. These models are easy to use for both expert and wet-lab scientists and are well-governed: organizations can track how the models are used, a key consideration for data of high proprietary value.
+The ability to computationally predict the 3D structure of proteins with near experimental accuracy is revolutionizing bioinformatics research and the way drug discovery is done. The release of AlphaFold2 by DeepMind, which won the CASP14 competition, and RoseTTAFold from the Baker Lab were the first such models to demonstrate such high performance and played a key role in the decision to award three of the researchers involved in these works the 2024 Nobel Prize in Chemistry. Many biotech and pharmaceutical organizations are using these models, including generative models for protein design, to reimagine how AI can shape their R&D businesses. Use cases include not only predicting structures to speed up analysis but also for downstream prediction of molecule properties, drug-binding, and perhaps most excitingly, generating new drugs against targets. We show how model serving, workflows, and apps on Databricks allow one to have an all-in-one platform for both protein folding and even generative protein design with a variety of cutting-edge models. These models are easy to use for both expert and wet-lab scientists and are well-governed: organizations can track how the models are used, a key consideration for data of high proprietary value. Model serving on Databricks allows for the GPU compute on the endpoint to scale up and down with use, including scaling to zero which prevents cost in periods when models are not in use.<br><br>
+
+<img src="./static/alphafold_app_screenshot.png" alt="App View" width="700">
+<br><br>
 
 **What's inside?** Tutorials for:
 
@@ -91,8 +94,6 @@ Boltz-1 | mlflow==2.15.1 | Apache2.0 | https://github.com/mlflow/mlflow
 Boltz-1 | cloudpickle==2.2.1 | https://github.com/cloudpipe/cloudpickle?tab=License-1-ov-file#readme | https://github.com/cloudpipe/cloudpickle
 Boltz-1 | requests>=2.25.1 | Apache2.0 | https://github.com/psf/requests
 Boltz-1 | boltz==0.4.0 | MIT | https://github.com/jwohlwend/boltz
-Boltz-1 | databricks-vectorsearch==0.44 |	DBLicense | TOBEREMOVED
-Boltz-1 | langchain==0.3.14 |	 | TOBEREMOVED
 Boltz-1 | rdkit | BSD-3 | https://github.com/rdkit/rdkit
 Boltz-1 | absl-py==1.0.0 |	Apache2.0 | https://github.com/abseil/abseil-py
 Boltz-1 | transformers>=4.41 | 	Apache2.0 | https://github.com/huggingface/transformers
