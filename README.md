@@ -94,8 +94,6 @@ Boltz-1 | mlflow==2.15.1 | Apache2.0 | https://github.com/mlflow/mlflow
 Boltz-1 | cloudpickle==2.2.1 | https://github.com/cloudpipe/cloudpickle?tab=License-1-ov-file#readme | https://github.com/cloudpipe/cloudpickle
 Boltz-1 | requests>=2.25.1 | Apache2.0 | https://github.com/psf/requests
 Boltz-1 | boltz==0.4.0 | MIT | https://github.com/jwohlwend/boltz
-Boltz-1 | databricks-vectorsearch==0.44 |	DBLicense | TOBEREMOVED
-Boltz-1 | langchain==0.3.14 |	 | TOBEREMOVED
 Boltz-1 | rdkit | BSD-3 | https://github.com/rdkit/rdkit
 Boltz-1 | absl-py==1.0.0 |	Apache2.0 | https://github.com/abseil/abseil-py
 Boltz-1 | transformers>=4.41 | 	Apache2.0 | https://github.com/huggingface/transformers
