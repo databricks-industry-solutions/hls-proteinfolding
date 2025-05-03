@@ -10,8 +10,6 @@ description = "boltz for mlflow integration and further msa options"
 dependencies = [
   "requests>=2.25.1",
   "boltz==0.4.0",
-  "databricks-vectorsearch==0.44",
-  "langchain==0.3.14",
   "rdkit",
   "absl-py==1.0.0",
   "transformers>=4.41",
