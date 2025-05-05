@@ -28,7 +28,7 @@ download_af2_datasets = False
 
 # COMMAND ----------
 
-# spark.sql("CREATE CATALOG IF NOT EXISTS protein_folding")
+spark.sql("CREATE CATALOG IF NOT EXISTS protein_folding")
 for model in ['alphafold','proteinmpnn','boltz','esmfold','rfdiffusion']:
     spark.sql(f"CREATE SCHEMA IF NOT EXISTS protein_folding.{model}")
 spark.sql("CREATE VOLUME IF NOT EXISTS protein_folding.alphafold.datasets")
@@ -39,11 +39,13 @@ spark.sql("CREATE VOLUME IF NOT EXISTS protein_folding.alphafold.results")
 compute_mapping = {
     'azure': {
         'Standard_NC4as_T4_v3': 'Standard_NC4as_T4_v3',
-        'Standard_D4ds_v5': 'Standard_D4ds_v5'
+        'Standard_D4ds_v5': 'Standard_D4ds_v5',
+        'Standard_F8': 'Standard_F8'
     },
     'aws': {
         'Standard_NC4as_T4_v3': 'g4dn.2xlarge',
-        'Standard_D4ds_v5': 'm5.xlarge'
+        'Standard_D4ds_v5': 'm5.xlarge',
+        'Standard_F8': 'c4.2xlarge'
     },
 }
 
@@ -151,6 +153,7 @@ with open(default_yaml_path, 'r') as file:
 updated_yaml_content = re.sub(r'<email>', email, yaml_content)
 updated_yaml_content = re.sub(r'<root_path>', base_path, updated_yaml_content)
 for c0,c1 in compute_mapping[cloud].items():
+  # print(c0,c1)
   updated_yaml_content = re.sub(c0, c1, updated_yaml_content)
 
 # COMMAND ----------
@@ -197,6 +200,7 @@ with open(default_yaml_path, 'r') as file:
 updated_yaml_content = re.sub(r'<email>', email, yaml_content)
 updated_yaml_content = re.sub(r'<notebooks_path>', afdl_notebooks_path, updated_yaml_content)
 for c0,c1 in compute_mapping[cloud].items():
+  # print(c0,c1)
   updated_yaml_content = re.sub(c0, c1, updated_yaml_content)
   
 try:
