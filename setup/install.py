@@ -5,18 +5,30 @@
 
 # COMMAND ----------
 
-# MAGIC %md
-# MAGIC ### note to self:
-# MAGIC   - also Azure compute vs aws
-
-# COMMAND ----------
-
 # MAGIC %pip install pyyaml
 # MAGIC %restart_python
 
 # COMMAND ----------
 
-spark.sql("CREATE CATALOG IF NOT EXISTS protein_folding")
+# MAGIC %md
+# MAGIC # Set a few choices for install: 
+# MAGIC  - email (for updates on install)
+# MAGIC  - cloud (azure and aws currently supported)
+# MAGIC  - download_af2_datasets
+# MAGIC    - these are large, but are required for AF2
+# MAGIC    - If true, download all datasets required - but, we do not include download 
+# MAGIC      of the full BFD even if set to True, opting to use bfd_small only for that
+# MAGIC      dataset expecting only very minor performance degradation with much faster inference.
+
+# COMMAND ----------
+
+email = ""
+cloud = 'azure' # can also be aws
+download_af2_datasets = False
+
+# COMMAND ----------
+
+# spark.sql("CREATE CATALOG IF NOT EXISTS protein_folding")
 for model in ['alphafold','proteinmpnn','boltz','esmfold','rfdiffusion']:
     spark.sql(f"CREATE SCHEMA IF NOT EXISTS protein_folding.{model}")
 spark.sql("CREATE VOLUME IF NOT EXISTS protein_folding.alphafold.datasets")
@@ -24,12 +36,27 @@ spark.sql("CREATE VOLUME IF NOT EXISTS protein_folding.alphafold.results")
 
 # COMMAND ----------
 
-# these are large, but are required for AF2
-# If true, download all datasets required - but, we do not include download 
-# of the full BFD even if set to True, opting to use bfd_small only for that
-# dataset expecting only very minor performance degradation with much faster inference.
-download_af2_datasets = False
-email = ""
+compute_mapping = {
+    'azure': {
+        'Standard_NC4as_T4_v3': 'Standard_NC4as_T4_v3',
+        'Standard_D4ds_v5': 'Standard_D4ds_v5'
+    },
+    'aws': {
+        'Standard_NC4as_T4_v3': 'g4dn.2xlarge',
+        'Standard_D4ds_v5': 'm5.xlarge'
+    },
+}
+
+af2_compute_mapping = {
+  'azure': {
+      'fold_compute' : "Standard_NC4as_T4_v3",
+      'featurize_compute' : "Standard_F8"
+  },
+  'aws': {
+      'fold_compute' : "g4dn.2xlarge",
+      'featurize_compute' : "c4.2xlarge"
+  }
+}
 
 # COMMAND ----------
 
@@ -84,9 +111,8 @@ default_yaml_path = "/Workspace"+directory_path+"/../tutorials/alphafold"+"/work
 af_notebooks_path = str(Path("/Workspace"+directory_path+"/../tutorials/alphafold"+"/workflow/notebooks").resolve())
 
 
-# For Azure
-fold_compute = "Standard_NC4as_T4_v3"
-featurize_compute = "Standard_F8"
+fold_compute = af2_compute_mapping[cloud]['fold_compute']
+featurize_compute = af2_compute_mapping[cloud]['featurize_compute']
 
 with open(default_yaml_path, 'r') as file:
     yaml_content = file.read()
@@ -124,7 +150,8 @@ with open(default_yaml_path, 'r') as file:
 
 updated_yaml_content = re.sub(r'<email>', email, yaml_content)
 updated_yaml_content = re.sub(r'<root_path>', base_path, updated_yaml_content)
-
+for c0,c1 in compute_mapping[cloud].items():
+  updated_yaml_content = re.sub(c0, c1, updated_yaml_content)
 
 # COMMAND ----------
 
@@ -169,7 +196,9 @@ with open(default_yaml_path, 'r') as file:
 
 updated_yaml_content = re.sub(r'<email>', email, yaml_content)
 updated_yaml_content = re.sub(r'<notebooks_path>', afdl_notebooks_path, updated_yaml_content)
-
+for c0,c1 in compute_mapping[cloud].items():
+  updated_yaml_content = re.sub(c0, c1, updated_yaml_content)
+  
 try:
     job_id = create_job_from_yaml(yaml_str = updated_yaml_content)
     print(f"Created job {job_id}")
