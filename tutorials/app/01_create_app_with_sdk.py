@@ -58,28 +58,28 @@ af2_resource = AppResource(
 
 # make a resource that will allow the app to access the esmfold serving endpoint
 esmfold_resource = AppResource(
-    name = 'serving-endpoint',
+    name = 'esmfold-serving-endpoint',
     serving_endpoint=AppResourceServingEndpoint(
         name = 'esmfold',
         permission = AppResourceServingEndpointServingEndpointPermission['CAN_QUERY']
     )
 )
 rfdiffusion_resource = AppResource(
-    name = 'serving-endpoint',
+    name = 'rfdiffusion-serving-endpoint',
     serving_endpoint=AppResourceServingEndpoint(
         name = 'rfdiffusion_inpainting',
         permission = AppResourceServingEndpointServingEndpointPermission['CAN_QUERY']
     )
 )
 proteinmpnn_resource = AppResource(
-    name = 'serving-endpoint',
+    name = 'proteinmpnn-serving-endpoint',
     serving_endpoint=AppResourceServingEndpoint(
         name = 'proteinmpnn',
         permission = AppResourceServingEndpointServingEndpointPermission['CAN_QUERY']
     )
 )
 boltz_resource = AppResource(
-    name = 'serving-endpoint',
+    name = 'boltz-serving-endpoint',
     serving_endpoint=AppResourceServingEndpoint(
         name = 'boltz',
         permission = AppResourceServingEndpointServingEndpointPermission['CAN_QUERY']

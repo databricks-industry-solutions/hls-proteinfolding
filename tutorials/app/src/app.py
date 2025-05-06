@@ -21,6 +21,8 @@ import time
 from structure_utils import select_and_align
 from protein_design import make_designs
 from molstar_tools import molstar_html_multibody
+from endpoint_queries import hit_esmfold, hit_boltz
+from alphafold import get_job_id, af_collect_and_align
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -29,207 +31,32 @@ logger = logging.getLogger(__name__)
 # Initialize the Databricks Workspace Client
 workspace_client = WorkspaceClient()
 
-# Ensure environment variable is set correctly
-assert os.getenv('SERVING_ENDPOINT'), "SERVING_ENDPOINT must be set in app.yaml."
 
-USE_DUMMY = False
-ASTEXT = False
-
-def dummy_pdb():
-    fpath = "dummy_pdb.pdb"
-    with open(fpath, 'r') as f:
-        lines = f.readlines()
-    return ''.join(lines)
-
-def query_esmfold(protein : str) -> str:
-    """
-    Query ESMfold with input sequence
-    """
-    if not protein.strip():
-        return "ERROR: The question should not be empty"
-
-    try:
-        logger.info(f"Sending request to model endpoint: {os.getenv('SERVING_ENDPOINT')}")
-        response = workspace_client.serving_endpoints.query(
-            name=os.getenv('SERVING_ENDPOINT'),
-            inputs=[protein]
-        )
-        logger.info("Received response from model endpoint")
-        return response.predictions[0]
-    except Exception as e:
-        logger.error(f"Error querying model: {str(e)}", exc_info=True)
-        return f"Error: {str(e)}"
-    
-# ------------------------------------------------------------- 
-# ------------BOLTZ FUNCTIONS TO BE CLEANED -------------------
-# ------------------------------------------------------------- 
-
-def _get_sp_token(base_url, sp_id, sp_oauth_token):
-        token_url = f"{base_url}/oidc/v1/token"
-        response = requests.post(
-            token_url,
-            auth=(sp_id, sp_oauth_token),
-            data={'grant_type': 'client_credentials', 'scope': 'all-apis'}
-        )
-        token = response.json().get('access_token')
-        logging.info(f"got token: (first two char are) {token[:2]}")
-        return token
-
-def run_boltz_model(ds_dict):
-    token = _get_sp_token(
-        base_url = 'https://adb-830292400663869.9.azuredatabricks.net',
-        sp_id = os.environ['DATABRICKS_CLIENT_ID'],
-        sp_oauth_token = os.environ['DATABRICKS_CLIENT_SECRET']
-    )
-    url = 'https://adb-830292400663869.9.azuredatabricks.net/serving-endpoints/dbboltz/invocations'
-    headers = {'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'}
-    data_json = json.dumps(ds_dict, allow_nan=True)
-    response = requests.request(method='POST', headers=headers, url=url, data=data_json)
-    logging.info(f"reponse is returned : {response.status_code}")
-    if response.status_code != 200:
-        raise Exception(f'Request failed with status {response.status_code}, {response.text}')
-    return response.json()
-
-def _format_boltz_input(indict):
-    return {
-        'dataframe_split':{
-        "columns": [
-        "input",
-        "msa",
-        "use_msa_server"
-        ],
-        "data": [
-        [
-            indict['input'],
-            indict["msa"],
-            indict["use_msa_server"]
-        ]
-        ]
-    }     
-    }
-
-def query_boltz(protein : str) -> str:
-    """
-    Query Boltz with input sequence
-    """
-    if not protein.strip():
-        return "ERROR: The question should not be empty"
-
-    try:
-        logger.info(f"Sending request to model endpoint: {os.getenv('BOLTZ_SERVING_ENDPOINT')}")
-
-        in_dict = {
-            'input':protein,
-            'msa':'no_msa',
-            'use_msa_server':'False'
-        }
-        in_dict = _format_boltz_input(in_dict)
-        logging.info(f"submitting: {in_dict}")
-        # response = workspace_client.serving_endpoints.query(
-        #     name=os.getenv('BOLTZ_SERVING_ENDPOINT'),
-        #     inputs=[in_dict]
-        # )
-        response = run_boltz_model(in_dict)
-        logger.info("Received response from model endpoint")
-        # return response.predictions[0]['pdb']
-        return response['predictions'][0]['pdb']
-    except Exception as e:
-        logger.error(f"Error querying model: {str(e)}", exc_info=True)
-        return f"Error: {str(e)}"
-
-# ------------------------------------------------------------- 
-# ------------ END BOLTZ FUNCTIONS ---------------------------- 
-# ------------------------------------------------------------- 
-
-def _cif_to_pdb_str(cif_str:str)->str:
-    with tempfile.TemporaryDirectory() as tmpdir:
-        my_cif_path = os.path.join(tmpdir, 'my_cif.cif')
-        my_pdb_path = os.path.join(tmpdir, 'my_pdb.cif')
-        with open(my_cif_path, 'w') as f:
-            f.write(cif_str)
-        structure = MMCIFParser().get_structure('download',my_cif_path)
-        io=PDBIO()
-        io.set_structure(structure)
-        io.save(my_pdb_path)
-        with open(my_pdb_path,'r') as f:
-            lines = f.readlines()
-        pdb_str = ''.join(lines)
-    return pdb_str
-
-def pull_alphafold_run(run_name : str ='run') -> str:
-    response = workspace_client.files.download(
-        f'/Volumes/protein_folding/alphafold/results/{run_name}/ranked_0.pdb'
-    )
-    pdb_str = str(response.contents.read(), encoding='utf-8')
-    return pdb_str
-
-def pull_pdbmmcif(pdb_code : str ='4ykk') -> str:
-    pdb_code = pdb_code.lower()
-    response = workspace_client.files.download(
-        f'/Volumes/protein_folding/alphafold/datasets/pdb_mmcif/mmcif_files/{pdb_code}.cif'
-    )
-    cif_str = str(response.contents.read(), encoding='utf-8')
-    return _cif_to_pdb_str(cif_str)
-
-def pdb_btn_fn(protein : str) -> str:
-    if not USE_DUMMY:
-        pdb = query_esmfold(protein)
-    else:
-        pdb = dummy_pdb()
+ASTEXT = False #True #False # useful for html debug if set to True
+# -------------- button definitions -------------------------------------------------
+      
+def esmfold_btn_fn(protein : str) -> str:
+    pdb = hit_esmfold(protein)
     html =  molstar_html_multibody(pdb)
     return html
 
+
 def boltz_btn_fn(protein : str) -> str:
-    pdb_run = query_boltz(protein)
+    pdb_run = hit_boltz(protein)
     html =  molstar_html_multibody(pdb_run)
     return html
 
-def apply_pdb_header(pdb_str: str, name: str) -> str:
-    header = f"""HEADER    "{name}"                           00-JAN-00   0XXX 
-    TITLE     "{name}"                         
-    COMPND    MOL_ID: 1;                                                            
-    COMPND   2 MOLECULE: {name};                          
-    COMPND   3 CHAIN: A;""" 
-    return header + pdb_str
-
-def af_btn_fn(run_name : str, pdb_code : Optional[str] = None, include_pdb : bool = False) -> str:
-    
-    pdb_run = pull_alphafold_run(run_name)
-    pdb_run = apply_pdb_header(pdb_run, run_name)
+def af_btn_fn(run_name : str, pdb_code : Optional[str] = None, include_pdb : bool = False) -> str: 
+    logging.info('running alphafold viewer')
+    pdb_run, true_structure_str, af_structure_str = af_collect_and_align(
+      run_name=run_name, pdb_code=pdb_code, include_pdb=include_pdb
+    )
     if include_pdb:
-        pdb_mmcif = pull_pdbmmcif(pdb_code)
-        # strings to biopdb structures
-        with tempfile.TemporaryDirectory() as tmpdir:
-            true_pdb_path = os.path.join(tmpdir, 'true_pdb.pdb')
-            af_pdb_path = os.path.join(tmpdir, 'af_pdb.pdb') 
-            with open(true_pdb_path, 'w') as f:
-                f.write(pdb_mmcif)
-            with open(af_pdb_path, 'w') as f:
-                f.write(pdb_run)
-            
-            true_structure = PDBParser().get_structure('true',true_pdb_path)
-            af_structure = PDBParser().get_structure('af',af_pdb_path)
-            true_structure_str, af_structure_str = select_and_align(
-                true_structure, af_structure
-            )
-            true_structure_str = apply_pdb_header(true_structure_str, run_name)
-            af_structure_str = apply_pdb_header(af_structure_str, "alphafold2 prediction")
         logging.info('sending two pdb str to html')
         html = molstar_html_multibody([af_structure_str, true_structure_str])
     else:
         html = molstar_html_multibody(pdb_run)
     return html
-
-def get_job_id(job_name : str ='alphafold'):
-    """ get the job_id of job with name job_name """
-    job_iter = workspace_client.jobs.list()
-    found_jobs = [j for j in job_iter if j.as_dict()['settings'].get('name')==job_name]
-    if len(found_jobs)==0:
-        logging.error("No job with name "+job_name+" found")
-    if not len(found_jobs)==1:
-        logging.error("Multiple jobs with the same name found")
-    found_job = found_jobs[0]
-    return found_job.job_id
 
 def af_run_btn_fn(run_name : str, protein : str) -> str:
     run_id = workspace_client.jobs.run_now(
@@ -239,35 +66,17 @@ def af_run_btn_fn(run_name : str, protein : str) -> str:
             'run_name':run_name
         }
     )
-    return "started run"
+    return f"started run: {run_id}"
 
 def design_btn_fn(sequence: str) -> str:
     n_rf_diffusion: int = 1
     designed_pdbs = make_designs(sequence)
-
-    with tempfile.TemporaryDirectory() as tmpdir:
-        for i in range(len(designed_pdbs['designed'])):
-            with open(os.path.join(tmpdir,f"d_{i}_structure.pdb"), 'w') as f:
-                f.write(designed_pdbs['designed'][i])
-        with open(os.path.join(tmpdir,"init_structure.pdb"), 'w') as f:
-            f.write(designed_pdbs['initial'])
-
-        init_structure = PDBParser().get_structure("esmfold_initial", os.path.join(tmpdir,"init_structure.pdb"))
-        unaligned_structures = []
-        for i in range(len(designed_pdbs['designed'])):
-            unaligned_structures.append( PDBParser().get_structure("designed", os.path.join(tmpdir,f"d_{i}_structure.pdb")) )
-
-    aligned_structures = []
-    for i, ua in enumerate(unaligned_structures):
-        init_structure_str, true_structure_str = select_and_align(
-            init_structure, ua
-        )
-        if i==0:
-            aligned_structures.append(init_structure_str)  
-        aligned_structures.append(true_structure_str)               
-
+    aligned_structures = align_designed_pdbs(designed_pdbs)           
     html =  molstar_html_multibody(aligned_structures)
     return html
+
+# -------------------------------------------------------------------------------------
+# -------------- set theming - make dark ----------------------------------------------
 
 theme = gr.themes.Soft(
     primary_hue="lime",
@@ -285,6 +94,11 @@ function refresh() {
 }
 """
 
+# -------------------------------------------------------------------------------------
+# -------------- construct the app  ---------------------------------------------------
+
+af_job_id = get_job_id(job_name='alphafold')
+
 with gr.Blocks(theme=theme, js=js_func) as demo:
     gr.Markdown(
         """
@@ -299,9 +113,9 @@ with gr.Blocks(theme=theme, js=js_func) as demo:
 
         """)
         with gr.Accordion("Details", open=False) as accordion:
-            gr.Markdown("""
+            gr.Markdown(f"""
                 #### Details
-                Use the ESMfold model serving [endpoint](https://adb-830292400663869.9.azuredatabricks.net/ml/endpoints/esmfold?o=830292400663869) to get pdb structure for a protein sequence of interest.
+                Use the ESMfold model serving [endpoint](https://{os.environ['DATABRICKS_HOST']}/ml/endpoints/esmfold) to get pdb structure for a protein sequence of interest.
             """)
         with gr.Row():
             protein = gr.Textbox(label="Protein",scale=4)
@@ -312,7 +126,7 @@ with gr.Blocks(theme=theme, js=js_func) as demo:
         else:
             html_structure = gr.Textbox(label="Structure")
         btn.click(
-            fn=pdb_btn_fn, 
+            fn=esmfold_btn_fn, 
             inputs=protein, 
             outputs=html_structure
         )
@@ -330,9 +144,9 @@ with gr.Blocks(theme=theme, js=js_func) as demo:
         """)
         with gr.Tab('Run'):
             with gr.Accordion("Details", open=False) as accordion:
-                gr.Markdown("""
+                gr.Markdown(f"""
                     #### Run Details
-                    Submits a job run on [this workflow](https://adb-830292400663869.9.azuredatabricks.net/jobs/20051695282124?o=830292400663869). run_name can be any anme you like. For multimers use ":" to split chains. Runs can be picked up in Unity catalog [here](https://adb-830292400663869.9.azuredatabricks.net/explore/data/volumes/protein_folding/alphafold/results?o=830292400663869). 
+                    Submits a job run on [this workflow](https://{os.environ['DATABRICKS_HOST']}/jobs/{af_job_id}). run_name can be any anme you like. For multimers use ":" to split chains. Runs can be picked up in Unity catalog [here](https://{os.environ['DATABRICKS_HOST']}/explore/data/volumes/protein_folding/alphafold/results). 
                 """)
             with gr.Row():
                 run_name_submit = gr.Textbox(label="run name",scale=1)

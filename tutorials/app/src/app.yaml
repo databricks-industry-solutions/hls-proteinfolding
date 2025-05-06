@@ -4,5 +4,11 @@ command: [
 ]
 
 env:
-  - name: "SERVING_ENDPOINT"
-    valueFrom: "serving-endpoint"
+  - name: "ESMFOLD_SERVING_ENDPOINT"
+    valueFrom: "esmfold-serving-endpoint"
+  - name: "RFDIFFUSION_SERVING_ENDPOINT"
+    valueFrom: "rfdiffusion-serving-endpoint"
+  - name: "PROTEINMPNN_SERVING_ENDPOINT"
+    valueFrom: "proteimpnn-serving-endpoint"
+  - name: "BOLTZ_SERVING_ENDPOINT"
+    valueFrom: "boltz-serving-endpoint"
