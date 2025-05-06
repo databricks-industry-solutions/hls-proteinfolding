@@ -8,7 +8,7 @@
 
 # COMMAND ----------
 
-# MAGIC %pip install -r scripts/rfd_requirements.txt
+# MAGIC %pip install -r envs/rfd_requirements.txt
 # MAGIC # identical pip reqs to the conda env will use to log the model (but without cudatoolkit)
 # MAGIC # allows to test in 14.3ML, and serve on serving with correct CUDA version
 # MAGIC dbutils.library.restartPython()
@@ -23,14 +23,14 @@ from mlflow.types.schema import ColSpec, Schema
 from typing import Any, Dict, List, Optional
 
 import logging
-# logging.basicConfig()
-# logging.getLogger().setLevel(logging.INFO)
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ##### consider : initialize_config_dir()
-# MAGIC  - use absolute not relative path...
+# MAGIC ## Model definition for RFDiffusion for Unconstrained Problem
+# MAGIC  - this is for predicting a backbone with only the protein legth being a constraint.
+# MAGIC  - We use the mlflow PythonModel as the base class
+# MAGIC  - Although RFDiffusion expects to run from command line, we set Hydra config within python to be able to run the main function from within our python code
 
 # COMMAND ----------
 
@@ -143,6 +143,11 @@ class RFDiffusionUnconditional(mlflow.pyfunc.PythonModel):
         plen = int(model_input[0])
         pdb = self._run_inference(plen)
         return pdb
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Inpainting version of RFDiffusion
 
 # COMMAND ----------
 
@@ -276,6 +281,11 @@ class RFDiffusionInpainting(mlflow.pyfunc.PythonModel):
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC ### Test the Unconditioned version
+
+# COMMAND ----------
+
 model = RFDiffusionUnconditional()
 repo_path = '/Volumes/protein_folding/rfdiffusion/repo_w_models/RFdiffusion/'
 artifacts={
@@ -359,6 +369,13 @@ pdbs[0].split('\n')[:10]
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC ## Begin the Model registration
+# MAGIC  - first set input examples (to keep with the model)
+# MAGIC  - and the model signatures
+
+# COMMAND ----------
+
 signature = mlflow.models.signature.ModelSignature(
     inputs = Schema([ColSpec(type="string")]),
     outputs = Schema([ColSpec(type="string")]),
@@ -382,6 +399,11 @@ print(inpaint_signature)
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC ### Perform the model registration
+
+# COMMAND ----------
+
 mlflow.set_registry_uri("databricks-uc")
 
 repo_path = '/Volumes/protein_folding/rfdiffusion/repo_w_models/RFdiffusion/'
@@ -398,7 +420,7 @@ with mlflow.start_run(run_name='rfdiffusion_unconditional'):
         },
         input_example=["100"],
         signature=signature,
-        conda_env='scripts/rfd_env.yml',
+        conda_env='envs/rfd_env.yml',
         registered_model_name="protein_folding.rfdiffusion.rfdiffusion_unconditional"
     )
 
@@ -414,7 +436,7 @@ with mlflow.start_run(run_name='rfdiffusion_inpainting'):
         },
         input_example=input_example,
         signature=inpaint_signature,
-        conda_env='scripts/rfd_env.yml',
+        conda_env='envs/rfd_env.yml',
         registered_model_name="protein_folding.rfdiffusion.rfdiffusion_inpainting"
     )
 

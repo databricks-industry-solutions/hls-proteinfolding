@@ -186,10 +186,4 @@ displayHTML(html)
 
 # COMMAND ----------
 
-# MAGIC %md
-# MAGIC ## did display HTML stop working? is it a DBR thing? something else?
-# MAGIC  - fails on serverless and 14.3 as tested currently... and now 15.4 also fails.
-
-# COMMAND ----------
-
 

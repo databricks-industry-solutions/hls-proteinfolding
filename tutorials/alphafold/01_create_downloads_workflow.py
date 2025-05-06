@@ -3,7 +3,8 @@
 # MAGIC # Create a workflow which will download essential datasets for Alphafold2 to Unity Catalog
 # MAGIC  - Note that some of the datasets required are very large (100s GB)
 # MAGIC  - You will in this notebook create a job specification (yaml) which you can copy into a new workflow in the UI
-# MAGIC  - when you run that job several independent tasks will start running to begin teh downloads
+# MAGIC    - **NOTE: you can perform (preferred) this install directly from the main repo install notebook**
+# MAGIC  - when you run that job several independent tasks will start running to begin the downloads
 # MAGIC  - some of these tasks may take 12-24 hours depending on the servers' (eg the PDB) capacity
 
 # COMMAND ----------

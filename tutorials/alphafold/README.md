@@ -2,14 +2,20 @@
 
 Because Alphafold runs both expensive CPU and GPU jobs, we split up the two sets of tasks (featurization and folding).
 
+
+![alphafold_cpu_gpu](./static/alphafold_CPU_GPU_split.png)
+
 The python module at workflow/scripts/run\_alphafold\_split.py has flags to allow you to run jsut the featurization (do on a CPU machine), 
 or to fold (using GPU) after loading up precomputed feature pickle. 
 
 This set up means featurization and folding can be set as two tasks in a Databricks job, with each task running on appropriate compute.
 
-Note that we suggest here manually placing yaml description (auto generated for you) of the job in the workflows UI to create the job - with the yaml one can also set up a Databricks Asset Bundle instead to build these resources.
-
 ### To setup alphafold:
+
+ **EASY install:**
+  - Suggest following the install instructions at the root of the repo for all models and app, and skiping the below, but if you only want alphafold you can do the below
+
+ **Alphafold install**
 
  1. If not already downloaded in your workspace - download datasets
     - Use 00_create_downloads_workflow to create a yaml that can be used to make a new workflows job

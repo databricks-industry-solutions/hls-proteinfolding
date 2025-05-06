@@ -4,7 +4,7 @@
 # MAGIC
 # MAGIC - This notebook sets up the environment for running Alphafold v2.3.2.
 # MAGIC - It installs Miniconda and creates a conda environment from a YAML file.
-# MAGIC - This is note normally recommended for distributed workloads, but since we will distribute via Workflows and each job runs on 8-16 cores max, single worker is reasonable here 
+# MAGIC - This is not normally recommended for distributed workloads, but since we will distribute via Workflows and each job runs on 8-16 cores max, single worker is reasonable here 
 # MAGIC - The notebook clones the Alphafold repository and checks out version 2.3.2.
 # MAGIC   - We use a (Databricks) modified version of the alphafold run script that can run either featurization or folding inpdendently
 # MAGIC   - this is essential for splitting CPU and GPU tasks for efficiency
@@ -19,7 +19,7 @@
 # MAGIC For folding consider GPU size
 # MAGIC  - T4 may be ok for small proteins
 # MAGIC  - A100 probably preferred for most proteins
-# MAGIC  - very long proteins may need to be run on larger GPU (could prefilter and send error message eg as part of a job - with a link to make a ticket or something,,)
+# MAGIC  - very long proteins may need to be run on larger GPU
 
 # COMMAND ----------
 
