@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 workspace_client = WorkspaceClient()
 
 
-ASTEXT = False #True #False # useful for html debug if set to True
+ASTEXT = False # useful for html debug if set to True
 # -------------- button definitions -------------------------------------------------
       
 def esmfold_btn_fn(protein : str) -> str:
@@ -98,6 +98,17 @@ function refresh() {
 # -------------- construct the app  ---------------------------------------------------
 
 af_job_id = get_job_id(job_name='alphafold')
+
+# helper pieces for Boltz complicated inputs
+boltz_dropdown_choices = ["protein","rna","dna","ligand"]
+MAX_ROWS = 10
+
+# def create_row(row_id, visible=True):
+#     with gr.Row(visible=visible) as row:
+#         dropdown = gr.Dropdown(boltz_dropdown_choices, label=f"Sequence Type {row_id}", scale=1)
+#         chain_box = gr.Textbox(label=f"Chain {row_id}", scale=1)
+#         seq_box = gr.Textbox(label=f"Sequence {row_id}", scale=5)
+#     return row, dropdown, chain_box, seq_box
 
 with gr.Blocks(theme=theme, js=js_func) as demo:
     gr.Markdown(
@@ -182,10 +193,20 @@ with gr.Blocks(theme=theme, js=js_func) as demo:
                 inputs=[run_name,include_pdb,pdb_code],
             )
     with gr.Tab('Design'):
+        gr.Markdown(
+        """
+        # Protein Structure Design with ESMfold, RFDiffusion and ProteinMPNN
+
+        """)
         with gr.Accordion("Details", open=False) as accordion:
-            gr.Markdown("""
-                ## Use RFdiffusion, ESMfold and ProteinMPNNN to inpaint and design proteins - eg for loop design
+            gr.Markdown(f"""
+                ## Use [RFdiffusion](https://{os.environ['DATABRICKS_HOST']}/ml/endpoints/rfdiffusion_inpainting), [ESMfold](https://{os.environ['DATABRICKS_HOST']}/ml/endpoints/esmfold) and [ProteinMPNNN](https://{os.environ['DATABRICKS_HOST']}/ml/endpoints/proteinmpnn) to inpaint and design proteins - eg for loop design
+
                  - input sequence in format: "CASRRSG[FTYPGF]FFEQYF" where the region between square braces is to be replaced/in-painted by new designs
+                 - internally generates the original sequence's (including the region in braces) structure using ESMFold
+                 - then uses RFdiffusion to generate a protein backbine with inpainting of the region between braces
+                 - ProteinMPNN is use to infer sequences of the backbones
+                 - the structures of these sequences are then inferred with ESMfold and aligned to the original
             """)
         with gr.Row():
             protein_for_design = gr.Textbox(label="Protein",scale=4)
@@ -211,38 +232,104 @@ with gr.Blocks(theme=theme, js=js_func) as demo:
         gr.Markdown(
         """
         # Protein Structure Prediction with Boltz-1
-
+         - you can add multiple sequence elements (protein, DNA, RNA, ligand)
         """)
         with gr.Accordion("Details", open=False) as accordion:
-            gr.Markdown("""
+            gr.Markdown(f"""
                 #### Details
-                Enter a protein sequence and view the structure. 
-                Use format: protein_A:sequence;protein_B,C:sequence
-                 - this input UX will be improved soon
-                 - types are protein, dna, rna, ligand
-                 - chain ids should be comma separated if more than one
+                [serving endpoint](https://{os.environ['DATABRICKS_HOST']}/ml/endpoints/boltz)
 
-                options for other MSA fields etc and easy add of non protein objects to be added.
+                Enter a protein sequence and view the structure. 
+
+                - the chain option is preselected as the next letter, but if you wish to predict the structure with repeated element you can use comma seperated chains on a single input sequence.
+                - The MSA stage is currently only supporting no MSA, but other options including mmseqs2 server can be supported on the endpoint
 
             """)
-        with gr.Row():
-            protein_boltz = gr.Textbox(label="Protein",scale=4)
-            btn_boltz = gr.Button("Predict", scale=1)
+
+        def load_example(example_idx):
+            dd_vals =  ["protein", "rna"] + [None] * (MAX_ROWS - 2)
+            ch_vals = ["A", "B"]  + [None] * (MAX_ROWS - 2)
+            se_vals = [
+                "MSSGTPTPSNVVLIGKKPVMNYVLAALTLLNQGVSEIVIKARGRAISKAVDTVEIVRNRFLPDKIEIKEIRVGSQVVTSQDGRQSRVSTIEIAIRKK", 
+                "GGUAAGAGCACCCGACUGCUCUUCC"
+            ] +  [None] * (MAX_ROWS - 2)
+            return [2] + dd_vals + ch_vals + se_vals
+        
+        load_btn = gr.Button("Load Example")
+
+        rows_container = gr.Group()
+    
+        # Track visible rows and components
+        visible_rows = gr.State(1)  # Start with 1 visible row
+        
+        dropdowns = []
+        chain_boxes = []
+        seq_boxes = []
+        with rows_container:
+            for i in range(MAX_ROWS):
+                row_id = i
+                with gr.Row(visible=(i == 0)) as row:
+                    dropdown = gr.Dropdown(boltz_dropdown_choices, value="protein",label=f"Sequence Type", scale=1)
+                    chain_box = gr.Textbox(label=f"Chain", value=chr(ord('A') + i), scale=1)
+                    seq_box = gr.Textbox(label=f"Sequence", scale=5)
+
+                    dropdowns.append(dropdown)
+                    chain_boxes.append(chain_box)
+                    seq_boxes.append(seq_box)
 
         if not ASTEXT:
             html_structure_boltz = gr.HTML(label="Structure")
         else:
             html_structure_boltz = gr.Textbox(label="Structure")
-        btn_boltz.click(
-            fn=boltz_btn_fn, 
-            inputs=protein_boltz, 
+        
+        add_btn = gr.Button("➕ Add Sequence (protein,ligand,D/RNA) ", size="sm")
+        run_btn = gr.Button("Run", variant="primary")
+
+        def add_row(visible_count):
+            return min(visible_count + 1, MAX_ROWS)
+        def update_row_visibility(visible_count):
+            return [gr.update(visible=(i < visible_count)) for i in range(MAX_ROWS)]
+        
+        def process_all(visible_count, *all_inputs):
+            logging.info("runnning process all of boltz-1")
+
+            dropdowns_ = all_inputs[:MAX_ROWS]
+            chain_boxes_ = all_inputs[MAX_ROWS:MAX_ROWS*2]
+            seq_boxes_ = all_inputs[MAX_ROWS*2:MAX_ROWS*3]
+
+            results = []
+            for i in range(visible_count):
+                dd_val = dropdowns_[i]
+                ch_val = chain_boxes_[i]
+                sq_val = seq_boxes_[i]
+                results.append(f"{dd_val}_{ch_val}:{sq_val}")
+            full_input =  ";".join(results)
+            logging.info(full_input)
+            return boltz_btn_fn(full_input)
+        
+        add_btn.click(
+            add_row,
+            inputs=visible_rows,
+            outputs=visible_rows
+        ).then(
+            update_row_visibility,
+            inputs=visible_rows,
+            outputs=[row for row in rows_container.children if isinstance(row, gr.Row)]
+        )
+        run_btn.click(
+            process_all,
+            inputs=[visible_rows]+ dropdowns + chain_boxes + seq_boxes,
             outputs=html_structure_boltz
         )
-        gr.Examples(
-            examples=[
-                "protein_A:SRALEEGRERLLWRLEPARGLEPPVVLVQTLTEPDWSVLDEGYAQVFPPKPFHPALKPGQRLRFRLRANPAKRLAATGKRVALKTPAEKVAWLERRLEEGGFRLLEGERGPWVQ;rna_B:UCCCCACGCGUGUGGGGAU"
-            ],
-            inputs=protein_boltz
+
+        load_btn.click(
+            load_example, 
+            inputs=[], 
+            outputs=[visible_rows]+ dropdowns + chain_boxes + seq_boxes,
+        ).then(
+            update_row_visibility,
+            inputs=visible_rows,
+            outputs=[row for row in rows_container.children if isinstance(row, gr.Row)]
         )
             
 

@@ -54,7 +54,8 @@ def run_boltz_model(ds_dict):
         sp_id = os.environ['DATABRICKS_CLIENT_ID'],
         sp_oauth_token = os.environ['DATABRICKS_CLIENT_SECRET']
     )
-    url = f"https://{os.environ['DATABRICKS_HOST']}/serving-endpoints/boltz/invocations"
+    url = f"https://{os.environ['DATABRICKS_HOST']}/serving-endpoints/{os.getenv('BOLTZ_SERVING_ENDPOINT')}/invocations"
+    logging.info(f"hitting {url}")
     headers = {'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'}
     data_json = json.dumps(ds_dict, allow_nan=True)
     response = requests.request(method='POST', headers=headers, url=url, data=data_json)
