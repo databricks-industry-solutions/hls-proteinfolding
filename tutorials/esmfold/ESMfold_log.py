@@ -74,6 +74,11 @@ class ESMFoldPyFunc(mlflow.pyfunc.PythonModel):
         torch.backends.cuda.matmul.allow_tf32 = True
 
     def _post_process(self, outputs):
+        """ postprocess ESMFold output to standard PDB string
+
+        this method as per part of code here https://github.com/huggingface/notebooks/blob/main/examples/protein_folding.ipynb
+        (copyright huggingface/notebooks, Apache 2.0, http://www.apache.org/licenses/LICENSE-2.0)
+        """
         final_atom_positions = transformers.models.esm.openfold_utils.feats.atom14_to_atom37(
             outputs["positions"][-1], 
             outputs
