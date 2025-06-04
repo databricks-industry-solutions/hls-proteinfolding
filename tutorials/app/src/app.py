@@ -19,7 +19,7 @@ import requests
 import time
 
 from structure_utils import select_and_align
-from protein_design import make_designs
+from protein_design import make_designs, align_designed_pdbs
 from molstar_tools import molstar_html_multibody
 from endpoint_queries import hit_esmfold, hit_boltz
 from alphafold import get_job_id, af_collect_and_align
@@ -55,7 +55,7 @@ def af_btn_fn(run_name : str, pdb_code : Optional[str] = None, include_pdb : boo
         logging.info('sending two pdb str to html')
         html = molstar_html_multibody([af_structure_str, true_structure_str])
     else:
-        html = molstar_html_multibody(pdb_run)
+        html = molstar_html_multibody(af_structure_str)
     return html
 
 def af_run_btn_fn(run_name : str, protein : str) -> str:
@@ -70,8 +70,13 @@ def af_run_btn_fn(run_name : str, protein : str) -> str:
 
 def design_btn_fn(sequence: str) -> str:
     n_rf_diffusion: int = 1
+    logging.info("design: make designs")
     designed_pdbs = make_designs(sequence)
-    aligned_structures = align_designed_pdbs(designed_pdbs)           
+    logging.info("design: align")
+    # logging.info([k for k in designed_pdbs.keys()])
+    # logging.info([v[:10] for v in designed_pdbs.values()])
+    aligned_structures = align_designed_pdbs(designed_pdbs)
+    logging.info("design: get html for designs")           
     html =  molstar_html_multibody(aligned_structures)
     return html
 

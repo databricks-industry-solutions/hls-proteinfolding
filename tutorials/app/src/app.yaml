@@ -9,6 +9,6 @@ env:
   - name: "RFDIFFUSION_SERVING_ENDPOINT"
     valueFrom: "rfdiffusion-serving-endpoint"
   - name: "PROTEINMPNN_SERVING_ENDPOINT"
-    valueFrom: "proteimpnn-serving-endpoint"
+    valueFrom: "proteinmpnn-serving-endpoint"
   - name: "BOLTZ_SERVING_ENDPOINT"
     valueFrom: "boltz-serving-endpoint"
