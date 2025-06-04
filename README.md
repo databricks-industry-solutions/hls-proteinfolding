@@ -58,27 +58,7 @@ ProteinMPNN | biopython==1.79 | https://github.com/biopython/biopython/blob/mast
 ProteinMPNN | cudatoolkit=11.3	| NVIDIA-EULA | https://docs.nvidia.com/cuda/eula/index.html
 ProteinMPNN | MODEL WEIGHTS | MIT | https://github.com/dauparas/ProteinMPNN
 Alphafold | AlphaFold (2.3.2) | Apache2.0 | https://github.com/google-deepmind/alphafold
-Alphafold | hmmer	| https://github.com/EddyRivasLab/hmmer/blob/master/LICENSE | https://github.com/EddyRivasLab/hmmer
-Alphafold | kalign	| GPL-3 | https://github.com/TimoLassmann/kalign
-Alphafold | hhsuite	| GPL-3 | https://github.com/soedinglab/hh-suite
-Alphafold | tzdata	| MIT | https://github.com/python/tzdata
-Alphafold | openmm==7.5.1 |	https://github.com/openmm/openmm/blob/master/docs-source/licenses/Licenses.txt | https://github.com/openmm/openmm
-Alphafold | pdbfixer |	https://github.com/openmm/pdbfixer/blob/master/LICENSE | https://github.com/openmm/pdbfixer
-Alphafold | jax==0.3.25 |	Apache2.0 | https://github.com/jax-ml/jax
-Alphafold | jaxlib==0.3.25+cuda11.cudnn805 | Apache2.0 | https://github.com/jax-ml/jax
-Alphafold | absl-py==1.0.0	| Apache2.0 | https://github.com/abseil/abseil-py
-Alphafold | biopython==1.79	| https://github.com/biopython/biopython/blob/master/LICENSE.rst | https://github.com/biopython/biopython
-Alphafold | chex==0.0.7	| Apache2.0 | https://github.com/google-deepmind/chex
-Alphafold | dm-haiku==0.0.9	| Apache2.0 | https://github.com/google-deepmind/chex/tree/master
-Alphafold | dm-tree==0.1.6	| Apache2.0 | https://github.com/google-deepmind/tree
-Alphafold | docker==5.0.0	| Apache2.0 | https://github.com/docker
-Alphafold | immutabledict==2.0.0 | MIT | https://github.com/corenting/immutabledict
-Alphafold | ml-collections==0.1.0 | Apache2.0 | https://github.com/google/ml_collections
-Alphafold | numpy==1.21.6 | https://github.com/numpy/numpy?tab=License-1-ov-file#readme | https://github.com/numpy/numpy
-Alphafold | pandas==1.3.4 | BSD-3 | https://github.com/pandas-dev/pandas
-Alphafold | protobuf==3.20.1 | https://github.com/protocolbuffers/protobuf?tab=License-1-ov-file#readme | https://github.com/protocolbuffers/protobuf
-Alphafold | scipy==1.7.0 | BSD-3 | https://github.com/scipy/scipy
-Alphafold | tensorflow-cpu==2.9.0 | Apache2.0 | https://github.com/tensorflow/tensorflow
+Alphafold | other dependencies | we provide a file of requirements per alphafold's own [repo](https://github.com/google-deepmind/alphafold), see [yml file](https://github.com/databricks-industry-solutions/hls-proteinfolding/blob/main/tutorials/alphafold/workflow/envs/alphafold_env.yml) for further details |
 Alphafold | MODEL WEIGHTS | CC BY 4.0
 ESMfold | ESMFold |	MIT | https://github.com/facebookresearch/esm
 ESMfold | torch | https://github.com/pytorch/pytorch?tab=License-1-ov-file#readme | https://github.com/pytorch/pytorch
