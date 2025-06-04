@@ -28,50 +28,50 @@ Please see LICENSE for the details of the license. Some packages, tools, and cod
 
 Tutorial | Package | License | Source
 -------- | ------- | ------- | --------
-RFDiffusion | RFDiffusion |	https://github.com/RosettaCommons/RFdiffusion?tab=License-1-ov-file#readme | https://github.com/RosettaCommons/RFdiffusion
+RFDiffusion | RFDiffusion |	BSD-3 | https://github.com/RosettaCommons/RFdiffusion
 RFDiffusion | Mlflow	| Apache2.0 | https://github.com/mlflow/mlflow
 RFDiffusion | Hydra	| MIT | https://github.com/facebookresearch/hydra
 RFDiffusion | OmegaConf |	BSD-3 | https://github.com/omry/omegaconf
-RFDiffusion | Biopython |	https://github.com/biopython/biopython/blob/master/LICENSE.rst | https://github.com/biopython/biopython
+RFDiffusion | Biopython |	[BioPython License Agreement](https://github.com/biopython/biopython/blob/master/LICENSE.rst) | https://github.com/biopython/biopython
 RFDiffusion | DGL	| Apache2.0 | https://github.com/dmlc/dgl
 RFDiffusion | pyrsistent |	MIT | https://github.com/tobgu/pyrsistent
 RFDiffusion | e3nn	| MIT | https://github.com/e3nn/e3nn
 RFDiffusion | Wandb |	MIT | https://github.com/wandb/wandb
 RFDiffusion | Pynvml	| BSD-3 | https://github.com/gpuopenanalytics/pynvml
 RFDiffusion | Decorator	| BSD-2 | https://github.com/micheles/decorator 
-RFDiffusion | Torch |	https://github.com/pytorch/pytorch?tab=License-1-ov-file#readme | https://github.com/pytorch/pytorch
+RFDiffusion | Torch |	BSD-3 | https://github.com/pytorch/pytorch
 RFDiffusion | Torchvision |	BSD-3 | https://github.com/pytorch/vision
 RFDiffusion | torchaudio==0.11.0 |	BSD-2 | https://github.com/pytorch/audio
-RFDiffusion | cloudpickle==2.2.1	| https://github.com/cloudpipe/cloudpickle?tab=License-1-ov-file#readme | https://github.com/cloudpipe/cloudpickle
+RFDiffusion | cloudpickle==2.2.1	| BSD-3 | https://github.com/cloudpipe/cloudpickle
 RFDiffusion | dllogger 	| Apache2.0 | https://github.com/NVIDIA/dllogger
-RFDiffusion | SE3Transformer |	https://github.com/RosettaCommons/RFdiffusion/blob/main/env/SE3Transformer/LICENSE | https://github.com/RosettaCommons/RFdiffusion/tree/main/env/SE3Transformer
+RFDiffusion | SE3Transformer |	MIT | https://github.com/RosettaCommons/RFdiffusion/tree/main/env/SE3Transformer
 RFDiffusion | cudatoolkit=11.3 | NVIDIA-EULA | https://docs.nvidia.com/cuda/eula/index.html
 RFDiffusion | MODEL WEIGHTS |	BSD | https://github.com/RosettaCommons/RFdiffusion
 ProteinMPNN | ProteinMPNN 	| MIT | https://github.com/dauparas/ProteinMPNN
-ProteinMPNN | Numpy |	https://github.com/numpy/numpy?tab=License-1-ov-file#readme | https://github.com/numpy/numpy
-ProteinMPNN | torch==1.11.0+cu113 |	https://github.com/pytorch/pytorch?tab=License-1-ov-file#readme | https://github.com/pytorch/pytorch
+ProteinMPNN | Numpy |	BSD-3 | https://github.com/numpy/numpy
+ProteinMPNN | torch==1.11.0+cu113 |	BSD-3 | https://github.com/pytorch/pytorch
 ProteinMPNN | torchvision==0.12.0+cu113 |	BSD-3 |  https://github.com/pytorch/vision 
 ProteinMPNN | torchaudio==0.11.0 | BSD-2 | https://github.com/pytorch/audio
 ProteinMPNN | mlflow==2.15.1 | Apache2.0 | https://github.com/mlflow/mlflow
-ProteinMPNN | cloudpickle==2.2.1 | https://github.com/cloudpipe/cloudpickle?tab=License-1-ov-file#readme | https://github.com/cloudpipe/cloudpickle
-ProteinMPNN | biopython==1.79 | https://github.com/biopython/biopython/blob/master/LICENSE.rst |  https://github.com/biopython/biopython
+ProteinMPNN | cloudpickle==2.2.1 | BSD-3 | https://github.com/cloudpipe/cloudpickle
+ProteinMPNN | biopython==1.79 | [BioPython License Agreement](https://github.com/biopython/biopython/blob/master/LICENSE.rst) |  https://github.com/biopython/biopython
 ProteinMPNN | cudatoolkit=11.3	| NVIDIA-EULA | https://docs.nvidia.com/cuda/eula/index.html
 ProteinMPNN | MODEL WEIGHTS | MIT | https://github.com/dauparas/ProteinMPNN
 Alphafold | AlphaFold (2.3.2) | Apache2.0 | https://github.com/google-deepmind/alphafold
 Alphafold | other dependencies | we provide a file of requirements per alphafold's own [repo](https://github.com/google-deepmind/alphafold), see [yml file](https://github.com/databricks-industry-solutions/hls-proteinfolding/blob/main/tutorials/alphafold/workflow/envs/alphafold_env.yml) for further details |
 Alphafold | MODEL WEIGHTS | CC BY 4.0
 ESMfold | ESMFold |	MIT | https://github.com/facebookresearch/esm
-ESMfold | torch | https://github.com/pytorch/pytorch?tab=License-1-ov-file#readme | https://github.com/pytorch/pytorch
+ESMfold | torch | BSD-3 | https://github.com/pytorch/pytorch
 ESMfold | transformers | Apache2.0 | https://github.com/huggingface/transformers
 ESMfold | accelerate | Apache2.0 | https://github.com/huggingface/transformers
 ESMfold | MODEL WEIGHTS | MIT
 Boltz-1 | Boltz-1 |	MIT | https://github.com/jwohlwend/boltz
 Boltz-1 | packaging |Apache2.0 | https://github.com/pypa/packaging
 Boltz-1 | ninja | Apache2.0 | https://github.com/scikit-build/ninja-python-distributions
-Boltz-1 | torch==2.3.1+cu121 | https://github.com/pytorch/pytorch?tab=License-1-ov-file#readme | https://github.com/pytorch/pytorch
+Boltz-1 | torch==2.3.1+cu121 | BSD-3 | https://github.com/pytorch/pytorch
 Boltz-1 | torchvision==0.18.1+cu121 | BSD-3 | https://github.com/pytorch/vision
 Boltz-1 | mlflow==2.15.1 | Apache2.0 | https://github.com/mlflow/mlflow
-Boltz-1 | cloudpickle==2.2.1 | https://github.com/cloudpipe/cloudpickle?tab=License-1-ov-file#readme | https://github.com/cloudpipe/cloudpickle
+Boltz-1 | cloudpickle==2.2.1 | BSD-3 | https://github.com/cloudpipe/cloudpickle
 Boltz-1 | requests>=2.25.1 | Apache2.0 | https://github.com/psf/requests
 Boltz-1 | boltz==0.4.0 | MIT | https://github.com/jwohlwend/boltz
 Boltz-1 | rdkit | BSD-3 | https://github.com/rdkit/rdkit
@@ -84,4 +84,4 @@ Boltz-1 | MODEL WEIGHTS |	MIT | https://github.com/jwohlwend/boltz
 App | gradio | Apache2.0 | https://github.com/gradio-app/gradio
 App | databricks-sdk>=0.1.0 | Apache2.0 | https://pypi.org/project/databricks-sdk/
 App | py3Dmol==2.4.0 | MIT | TOBEREMOVED (https://pypi.org/project/py3Dmol/)
-App | biopython |	https://github.com/biopython/biopython/blob/master/LICENSE.rst | https://github.com/biopython/biopython
+App | biopython |	[BioPython License Agreement](https://github.com/biopython/biopython/blob/master/LICENSE.rst) | https://github.com/biopython/biopython
