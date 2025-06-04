@@ -31,7 +31,7 @@ def hit_esmfold(sequence):
 
 @mlflow.trace(span_type="TOOL")
 def hit_rfdiffusion(input_dict):
-    return hit_model_endpoint('rfdiffusion_inpaint', [input_dict])[0]
+    return hit_model_endpoint('rfdiffusion_inpainting', [input_dict])[0]
 
 @mlflow.trace(span_type="TOOL")
 def hit_proteinmpnn(pdb_str):

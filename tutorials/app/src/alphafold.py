@@ -39,6 +39,8 @@ def af_collect_and_align(run_name : str, pdb_code : Optional[str] = None, includ
     pdb_run = pull_alphafold_run(run_name)
     logging.info("add header")
     pdb_run = apply_pdb_header(pdb_run, run_name)
+    true_structure_str = ""
+    af_structure_str = pdb_run
     if include_pdb:
       logging.info("collect PDB entry")
       pdb_mmcif = pull_pdbmmcif(pdb_code)
