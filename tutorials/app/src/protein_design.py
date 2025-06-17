@@ -10,6 +10,8 @@ from Bio.PDB import PDBParser
 from Bio import PDB
 import tempfile
 
+from structure_utils import select_and_align
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 workspace_client = WorkspaceClient()
@@ -36,7 +38,7 @@ def hit_esmfold(sequence):
 
 @mlflow.trace(span_type="TOOL")
 def hit_rfdiffusion(input_dict):
-    return hit_model_endpoint('rfdiffusion_inpaint', [input_dict])[0]
+    return hit_model_endpoint('rfdiffusion_inpainting', [input_dict])[0]
 
 @mlflow.trace(span_type="TOOL")
 def hit_proteinmpnn(pdb_str):
@@ -122,4 +124,27 @@ def make_designs(sequence, n_rfdiffusion_hits=1):
         'initial': esmfold_initial,
         'designed': all_pdbs
     }
+
+def align_designed_pdbs(designed_pdbs):
+    with tempfile.TemporaryDirectory() as tmpdir:
+        for i in range(len(designed_pdbs['designed'])):
+            with open(os.path.join(tmpdir,f"d_{i}_structure.pdb"), 'w') as f:
+                f.write(designed_pdbs['designed'][i])
+        with open(os.path.join(tmpdir,"init_structure.pdb"), 'w') as f:
+            f.write(designed_pdbs['initial'])
+
+        init_structure = PDBParser().get_structure("esmfold_initial", os.path.join(tmpdir,"init_structure.pdb"))
+        unaligned_structures = []
+        for i in range(len(designed_pdbs['designed'])):
+            unaligned_structures.append( PDBParser().get_structure("designed", os.path.join(tmpdir,f"d_{i}_structure.pdb")) )
+
+    aligned_structures = []
+    for i, ua in enumerate(unaligned_structures):
+        init_structure_str, true_structure_str = select_and_align(
+            init_structure, ua
+        )
+        if i==0:
+            aligned_structures.append(init_structure_str)  
+        aligned_structures.append(true_structure_str) 
+    return aligned_structures
 

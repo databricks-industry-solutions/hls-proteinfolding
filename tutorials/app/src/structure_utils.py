@@ -5,6 +5,10 @@ import numpy as np
 import os
 import tempfile
 
+from Bio.PDB.MMCIFParser import MMCIFParser
+from Bio.PDB.PDBParser import PDBParser
+from Bio.PDB.PDBIO import PDBIO
+
 class ChainSelect(bp.Select):
     def __init__(self, chain):
         self.chain = chain
@@ -19,6 +23,20 @@ class ChainSelect(bp.Select):
         else:          
             return 0
         
+def _cif_to_pdb_str(cif_str:str)->str:
+    with tempfile.TemporaryDirectory() as tmpdir:
+        my_cif_path = os.path.join(tmpdir, 'my_cif.cif')
+        my_pdb_path = os.path.join(tmpdir, 'my_pdb.cif')
+        with open(my_cif_path, 'w') as f:
+            f.write(cif_str)
+        structure = MMCIFParser().get_structure('download',my_cif_path)
+        io=PDBIO()
+        io.set_structure(structure)
+        io.save(my_pdb_path)
+        with open(my_pdb_path,'r') as f:
+            lines = f.readlines()
+        pdb_str = ''.join(lines)
+    return pdb_str
 
 def get_seq_alignment(structure1, structure2):
     """ structures can be biopy.PDB.Structures, Models, or Chains """
