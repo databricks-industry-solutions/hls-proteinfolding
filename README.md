@@ -24,7 +24,7 @@ Inside /setup you can run the ""install" notebook and models will be registered 
 
 License
 --------
-Please see LICENSE for the details of the license. Some packages, tools, and code used inside individual tutorials are under their own licenses as described therein. Please ensure you read the details of the tutorials and licensing of individual tools. Other thrid party packages are used in tutorials within this accelerator and have their own licensing, as laid out in the table below. We note also that we made minor modifations to alphafold2 code in both the alpahfold and boltz-1 tutorials, notes on the changes made can be found in those tutorials. The proteinMPNN package was reformatted from source in order to be packagable with pip. In the app tutorial we additionally modified examples from Modal-labs model-examples repo (MIT) for molstar viewer html construction, this is noted in the application tutorial also.
+Please see LICENSE for the details of the license. Some packages, tools, and code used inside individual tutorials are under their own licenses as described therein. Please ensure you read the details of the tutorials and licensing of individual tools. Other thrid party packages are used in tutorials within this accelerator and have their own licensing, as laid out in the table below. We note also that we made minor modifations to alphafold2 code in both the alpahfold and boltz-1 tutorials, notes on the changes made can be found in those tutorials. The proteinMPNN package was reformatted from source in order to be packagable with pip. In the app tutorial we additionally modified examples from Modal-labs model-examples repo (MIT) for molstar viewer html construction, this is noted in the application tutorial also. NVIDIA GPUs and cudatoolkit may be used in multiple places so you should consider the NVIDIA EULA(link) when using code in this package.
 
 Tutorial | Package | License | Source
 -------- | ------- | ------- | --------
@@ -45,7 +45,6 @@ RFDiffusion | torchaudio==0.11.0 |	BSD-2 | https://github.com/pytorch/audio
 RFDiffusion | cloudpickle==2.2.1	| BSD-3 | https://github.com/cloudpipe/cloudpickle
 RFDiffusion | dllogger 	| Apache2.0 | https://github.com/NVIDIA/dllogger
 RFDiffusion | SE3Transformer |	MIT | https://github.com/RosettaCommons/RFdiffusion/tree/main/env/SE3Transformer
-RFDiffusion | cudatoolkit=11.3 | NVIDIA-EULA | https://docs.nvidia.com/cuda/eula/index.html
 RFDiffusion | MODEL WEIGHTS |	BSD | https://github.com/RosettaCommons/RFdiffusion
 ProteinMPNN | ProteinMPNN 	| MIT | https://github.com/dauparas/ProteinMPNN
 ProteinMPNN | Numpy |	BSD-3 | https://github.com/numpy/numpy
@@ -55,7 +54,6 @@ ProteinMPNN | torchaudio==0.11.0 | BSD-2 | https://github.com/pytorch/audio
 ProteinMPNN | mlflow==2.15.1 | Apache2.0 | https://github.com/mlflow/mlflow
 ProteinMPNN | cloudpickle==2.2.1 | BSD-3 | https://github.com/cloudpipe/cloudpickle
 ProteinMPNN | biopython==1.79 | [BioPython License Agreement](https://github.com/biopython/biopython/blob/master/LICENSE.rst) |  https://github.com/biopython/biopython
-ProteinMPNN | cudatoolkit=11.3	| NVIDIA-EULA | https://docs.nvidia.com/cuda/eula/index.html
 ProteinMPNN | MODEL WEIGHTS | MIT | https://github.com/dauparas/ProteinMPNN
 Alphafold | AlphaFold (2.3.2) | Apache2.0 | https://github.com/google-deepmind/alphafold
 Alphafold | other dependencies | we provide a file of requirements per alphafold's own [repo](https://github.com/google-deepmind/alphafold), see [yml file](https://github.com/databricks-industry-solutions/hls-proteinfolding/blob/main/tutorials/alphafold/workflow/envs/alphafold_env.yml) for further details |
