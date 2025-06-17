@@ -205,12 +205,12 @@ with gr.Blocks(theme=theme, js=js_func) as demo:
         """)
         with gr.Accordion("Details", open=False) as accordion:
             gr.Markdown(f"""
-                ## Use [RFdiffusion](https://{os.environ['DATABRICKS_HOST']}/ml/endpoints/rfdiffusion_inpainting), [ESMfold](https://{os.environ['DATABRICKS_HOST']}/ml/endpoints/esmfold) and [ProteinMPNNN](https://{os.environ['DATABRICKS_HOST']}/ml/endpoints/proteinmpnn) to inpaint and design proteins - eg for loop design
+                ## Use [RFdiffusion](https://{os.environ['DATABRICKS_HOST']}/ml/endpoints/rfdiffusion_inpainting), [ESMfold](https://{os.environ['DATABRICKS_HOST']}/ml/endpoints/esmfold) and [ProteinMPNN](https://{os.environ['DATABRICKS_HOST']}/ml/endpoints/proteinmpnn) to inpaint and design proteins - eg for loop design
 
                  - input sequence in format: "CASRRSG[FTYPGF]FFEQYF" where the region between square braces is to be replaced/in-painted by new designs
                  - internally generates the original sequence's (including the region in braces) structure using ESMFold
-                 - then uses RFdiffusion to generate a protein backbine with inpainting of the region between braces
-                 - ProteinMPNN is use to infer sequences of the backbones
+                 - then uses RFdiffusion to generate a protein backbone with inpainting of the region between braces
+                 - ProteinMPNN is used to infer sequences of the backbones
                  - the structures of these sequences are then inferred with ESMfold and aligned to the original
             """)
         with gr.Row():
