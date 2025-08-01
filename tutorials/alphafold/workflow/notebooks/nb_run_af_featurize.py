@@ -24,7 +24,13 @@
 # MAGIC rm -rf /miniconda3/miniconda.sh
 # MAGIC
 # MAGIC source /miniconda3/bin/activate
-# MAGIC
+# MAGIC cat > /miniconda3/.condarc <<EOF
+# MAGIC channels:
+# MAGIC   - conda-forge
+# MAGIC   - bioconda
+# MAGIC   - nodefaults
+# MAGIC channel_priority: strict
+# MAGIC EOF
 # MAGIC conda env create -f ../envs/alphafold_env.yml 
 # MAGIC
 # MAGIC mkdir -p /alphafold
