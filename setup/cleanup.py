@@ -71,7 +71,7 @@ if not len(found_jobs)==1:
 if len(found_jobs)>0:
   found_job = found_jobs[0]
   print(found_job)
-  w.delete(found_job.job_id)
+  w.jobs.delete(found_job.job_id)
 
 # COMMAND ----------
 
