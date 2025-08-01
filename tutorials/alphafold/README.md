@@ -5,7 +5,7 @@ Because Alphafold runs both expensive CPU and GPU jobs, we split up the two sets
 
 ![alphafold_cpu_gpu](./static/alphafold_CPU_GPU_split.png)
 
-The python module at workflow/scripts/run\_alphafold\_split.py has flags to allow you to run jsut the featurization (do on a CPU machine), 
+The python module at workflow/scripts/run\_alphafold\_split.py has flags to allow you to run just the featurization (do on a CPU machine), 
 or to fold (using GPU) after loading up precomputed feature pickle. 
 
 This set up means featurization and folding can be set as two tasks in a Databricks job, with each task running on appropriate compute.
