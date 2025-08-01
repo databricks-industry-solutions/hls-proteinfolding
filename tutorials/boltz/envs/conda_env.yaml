@@ -15,4 +15,4 @@ dependencies:
     - torchvision==0.18.1+cu121
     - mlflow==2.15.1
     - cloudpickle==2.2.1
-    - /model/artifacts/dbboltz[gpu]
+    - /model/artifacts/dbboltz
