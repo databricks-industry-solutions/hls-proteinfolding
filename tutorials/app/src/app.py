@@ -73,8 +73,6 @@ def design_btn_fn(sequence: str) -> str:
     logging.info("design: make designs")
     designed_pdbs = make_designs(sequence)
     logging.info("design: align")
-    # logging.info([k for k in designed_pdbs.keys()])
-    # logging.info([v[:10] for v in designed_pdbs.values()])
     aligned_structures = align_designed_pdbs(designed_pdbs)
     logging.info("design: get html for designs")           
     html =  molstar_html_multibody(aligned_structures)
@@ -108,12 +106,6 @@ af_job_id = get_job_id(job_name='alphafold')
 boltz_dropdown_choices = ["protein","rna","dna","ligand"]
 MAX_ROWS = 10
 
-# def create_row(row_id, visible=True):
-#     with gr.Row(visible=visible) as row:
-#         dropdown = gr.Dropdown(boltz_dropdown_choices, label=f"Sequence Type {row_id}", scale=1)
-#         chain_box = gr.Textbox(label=f"Chain {row_id}", scale=1)
-#         seq_box = gr.Textbox(label=f"Sequence {row_id}", scale=5)
-#     return row, dropdown, chain_box, seq_box
 
 with gr.Blocks(theme=theme, js=js_func) as demo:
     gr.Markdown(
@@ -264,8 +256,8 @@ with gr.Blocks(theme=theme, js=js_func) as demo:
 
         rows_container = gr.Group()
     
-        # Track visible rows and components
-        visible_rows = gr.State(1)  # Start with 1 visible row
+        # tracks visible rows and components
+        visible_rows = gr.State(1)  
         
         dropdowns = []
         chain_boxes = []
