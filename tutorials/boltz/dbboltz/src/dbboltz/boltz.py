@@ -190,15 +190,9 @@ def process_boltz_inputs(
     boltz_yaml_file_path: str,
     tmp_file_path: str,
     sequences: Dict[str, List[Tuple]],
-    # protein_sequences: Optional[List[str]] = None,
     msa_file_paths: Optional[List[str]] = None,
-    # dna_sequences: Optional[List[str]] = None,
-    # rna_sequences: Optional[List[str]] = None,
-    # small_molecule_sequences: Optional[List[str]] = None,
     cache: Optional[str] = None
     ):
-    # if small_molecule_sequences is not None or nucleotide_sequences is not None or :
-    #     raise NotImplementedError("nucleotide_sequences and small_molecule_sequences are not supported yet.")
 
     protein_sequences = sequences.get('protein', None)
 
@@ -329,7 +323,6 @@ def run_boltz(
             raise ValueError("msa must be one of ['jh', 'no_msa', 'mmseqs']")
 
         # write msas to file for each sequence
-        # I need to place in a named temp dir instead
         with tempfile.TemporaryDirectory() as tmp_dir:
             msa_paths = []
             for i, (s,msa_text) in enumerate(zip(sequences['protein'], msas)):
@@ -380,7 +373,7 @@ class Boltz(mlflow.pyfunc.PythonModel):
         self.artifacts = context.artifacts
         self.model_config = context.model_config
         # NOTE: eventaully want to reqrite Boltz so that model load to GPU happens
-        # only at this point and not on inference...
+        # only at this point and not on inference. This is a more major effort. 
     
     def _prep_input_sequences(self, model_input : str) -> Dict[str, List[Tuple]]:
         def _get_ids(key):
@@ -455,9 +448,6 @@ class Boltz(mlflow.pyfunc.PythonModel):
         
         params = {k:v for k,v in model_input.items() if k!='input'}
         model_input = model_input['input']
-        
-        # if params is None:
-        #     params = DEFAULT_PARAMS.copy()
 
         sequences = self._prep_input_sequences(model_input)
             
@@ -477,7 +467,7 @@ class Boltz(mlflow.pyfunc.PythonModel):
         if 'cache' not in parsed_params:
             params_.update({'cache':self.artifacts['CACHE_DIR']})
 
-        # allow user to overwrite config (copy) during inference (to decide how good an idea this is..)
+        # allow user to overwrite config (copy) during inference (this may later be changed)
         mc = self.model_config.copy()
         mc.update(params_)
 
