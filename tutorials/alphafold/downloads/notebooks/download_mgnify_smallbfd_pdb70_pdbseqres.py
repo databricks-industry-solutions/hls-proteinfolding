@@ -45,6 +45,8 @@
 # MAGIC if [ ! -d "/Volumes/protein_folding/alphafold/datasets/pdb_seqres" ]; then
 # MAGIC     echo "Downloading pdb_seqres"
 # MAGIC     cd /app/alphafold/scripts
+# MAGIC     NEWLINE='SOURCE_URL="https://files.wwpdb.org/pub/pdb/derived_data/pdb_seqres.txt"'
+# MAGIC     sed -i "s|^SOURCE_URL=.*|$NEWLINE|" download_pdb_seqres.sh
 # MAGIC     ./download_pdb_seqres.sh /local_disk0/downloads
 # MAGIC     cd /
 # MAGIC     cp -r /local_disk0/downloads/pdb_seqres /Volumes/protein_folding/alphafold/datasets/
