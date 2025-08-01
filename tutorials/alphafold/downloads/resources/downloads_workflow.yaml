@@ -58,7 +58,7 @@ resources:
             notebook_path: <notebooks_path>/download_uniprot
             source: WORKSPACE
           job_cluster_key: download_uniprot_cluster
-          timeout_seconds: 21600
+          timeout_seconds: 36000
           health:
             rules:
               - metric: RUN_DURATION_SECONDS
