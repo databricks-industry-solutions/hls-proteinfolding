@@ -1,7 +1,25 @@
 # Databricks notebook source
 # MAGIC %md
 # MAGIC # Install protein folding models
-# MAGIC Runs on serverless
+# MAGIC  - Runs on serverless
+# MAGIC
+# MAGIC Simple single notebook install of all models, provisioning model serving endpoints (with scale to zero on so they do not cost while idle), and an application for hosting the models in a UI. Optionally download alphafold2 datasets with flag in the install notebooks.
+# MAGIC
+# MAGIC ### notes
+# MAGIC   - must be workspace admin
+# MAGIC   - don't forget to set your email in the notebook (for alerts etc)
+# MAGIC   - you can set download alphafold datasets to True if you wish to download them
+# MAGIC     - if you already have a copy elsewhere you can copy them over 
+# MAGIC     - or create an external volume, though you'll need to modify the paths in the alphafold running notebook to change where to look for the databases.
+# MAGIC
+# MAGIC The install notebook will generate a workflow "folding setup", and will look like this:
+# MAGIC
+# MAGIC <br>
+# MAGIC <img src="../static/install_workflow.png" alt="workflow install" width="700">
+# MAGIC <br>
+# MAGIC
+# MAGIC ## Uninstall
+# MAGIC - Cleanup notebook will delete models, workflows, catalog objects, and the app
 
 # COMMAND ----------
 
