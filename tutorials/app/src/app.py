@@ -68,14 +68,12 @@ def af_run_btn_fn(run_name : str, protein : str) -> str:
     )
     return f"started run: {run_id}"
 
-def design_btn_fn(sequence: str) -> str:
+def design_btn_fn(sequence: str, n_show:int) -> str:
     n_rf_diffusion: int = 1
     logging.info("design: make designs")
     designed_pdbs = make_designs(sequence)
     logging.info("design: align")
-    # logging.info([k for k in designed_pdbs.keys()])
-    # logging.info([v[:10] for v in designed_pdbs.values()])
-    aligned_structures = align_designed_pdbs(designed_pdbs)
+    aligned_structures = align_designed_pdbs(designed_pdbs)[:(1+int(n_show))]
     logging.info("design: get html for designs")           
     html =  molstar_html_multibody(aligned_structures)
     return html
@@ -108,12 +106,6 @@ af_job_id = get_job_id(job_name='alphafold')
 boltz_dropdown_choices = ["protein","rna","dna","ligand"]
 MAX_ROWS = 10
 
-# def create_row(row_id, visible=True):
-#     with gr.Row(visible=visible) as row:
-#         dropdown = gr.Dropdown(boltz_dropdown_choices, label=f"Sequence Type {row_id}", scale=1)
-#         chain_box = gr.Textbox(label=f"Chain {row_id}", scale=1)
-#         seq_box = gr.Textbox(label=f"Sequence {row_id}", scale=5)
-#     return row, dropdown, chain_box, seq_box
 
 with gr.Blocks(theme=theme, js=js_func) as demo:
     gr.Markdown(
@@ -212,10 +204,13 @@ with gr.Blocks(theme=theme, js=js_func) as demo:
                  - then uses RFdiffusion to generate a protein backbone with inpainting of the region between braces
                  - ProteinMPNN is used to infer sequences of the backbones
                  - the structures of these sequences are then inferred with ESMfold and aligned to the original
+
+                The number of designs to show can be made lower to make it easier to view, but in a computational pipeline for instance you'd generate many designs.
             """)
         with gr.Row():
             protein_for_design = gr.Textbox(label="Protein",scale=4)
             # n_designs = gr.Textbox(label="number of designs",scale=4)
+            n_show = gr.Textbox(label="number of designs to show",scale=1)
             design_btn = gr.Button("Predict", scale=1)
 
         if not ASTEXT:
@@ -225,13 +220,16 @@ with gr.Blocks(theme=theme, js=js_func) as demo:
         
         design_btn.click(
             fn=design_btn_fn, 
-            inputs=[protein_for_design], 
+            inputs=[protein_for_design, n_show], 
             outputs=d_html_structures
         )
 
         gr.Examples(
-            examples=["CASRRSG[FTYPGF]FFEQYF"],
-            inputs=protein_for_design,
+            examples=[
+                ["GGSVQAGGSLRLSCVASGVTSTRPCIGWFRQAPGKEREGVAVVNFRGDSTYITDSVKGRFTISRDEDSDTVYLQMNSLKPEDTATYY[CAADVNRGGFCYIEDWY]FSYWGQGTQVTVSSA",
+                1],
+            ],
+            inputs=[protein_for_design, n_show],
         )
     with gr.Tab('Boltz-1'):
         gr.Markdown(
@@ -264,8 +262,8 @@ with gr.Blocks(theme=theme, js=js_func) as demo:
 
         rows_container = gr.Group()
     
-        # Track visible rows and components
-        visible_rows = gr.State(1)  # Start with 1 visible row
+        # tracks visible rows and components
+        visible_rows = gr.State(1)  
         
         dropdowns = []
         chain_boxes = []

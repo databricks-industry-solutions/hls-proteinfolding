@@ -15,5 +15,4 @@ We suggest install using the install instructions as per the README of the full 
    - fetch_repo_and_weights: place repo and model weights into a volume in Unity Catalog
    - rfdiffusion_log: log and register the models to Unity Catalog
    - serve_rfdiffusion: use the Databricks SDK to serve the registered models in model serving
-   - rfdiffusion_from_load: Shows how you can use the model using GPU compute on notebook by laoding model
    - query_rfdiffusion_endpoint: Shows how you can query rfdiffusion model serving endpoint

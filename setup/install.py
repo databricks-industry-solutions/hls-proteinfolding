@@ -1,7 +1,25 @@
 # Databricks notebook source
 # MAGIC %md
 # MAGIC # Install protein folding models
-# MAGIC Runs on serverless
+# MAGIC  - Runs on serverless
+# MAGIC
+# MAGIC Simple single notebook install of all models, provisioning model serving endpoints (with scale to zero on so they do not cost while idle), and an application for hosting the models in a UI. Optionally download alphafold2 datasets with flag in the install notebooks.
+# MAGIC
+# MAGIC ### notes
+# MAGIC   - must be workspace admin
+# MAGIC   - don't forget to set your email in the notebook (for alerts etc)
+# MAGIC   - you can set download alphafold datasets to True if you wish to download them
+# MAGIC     - if you already have a copy elsewhere you can copy them over 
+# MAGIC     - or create an external volume, though you'll need to modify the paths in the alphafold running notebook to change where to look for the databases.
+# MAGIC
+# MAGIC The install notebook will generate a workflow "folding setup", and will look like this:
+# MAGIC
+# MAGIC <br>
+# MAGIC <img src="../static/install_workflow.png" alt="workflow install" width="700">
+# MAGIC <br>
+# MAGIC
+# MAGIC ## Uninstall
+# MAGIC - Cleanup notebook will delete models, workflows, catalog objects, and the app
 
 # COMMAND ----------
 
@@ -41,7 +59,7 @@ from dbx_folding_compute import compute_mapping, af2_compute_mapping
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ### Make the AF2 workflow ready to be run as needed later
+# MAGIC ### Some helper code to tell us where assets are and create jobs
 
 # COMMAND ----------
 
@@ -86,6 +104,11 @@ def create_job_from_yaml(yaml_path: Optional[str] = None, yaml_str: Optional[str
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC ### Make the AF2 workflow ready to be run as needed later
+
+# COMMAND ----------
+
 
 default_yaml_path = "/Workspace"+directory_path+"/../tutorials/alphafold"+"/workflow/resources/example_workflow_setup.yaml"
 af_notebooks_path = str(Path("/Workspace"+directory_path+"/../tutorials/alphafold"+"/workflow/notebooks").resolve())
@@ -111,7 +134,7 @@ except Exception as e:
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC # Now install all the models for serving and make the App
+# MAGIC ## Now install all the models for serving and make the App
 
 # COMMAND ----------
 
@@ -153,14 +176,13 @@ except Exception as e:
 
 w = WorkspaceClient()
 try:
-  # run_by_id = w.jobs.run_now(job_id=job_id).result()
   w.jobs.run_now(job_id=job_id)
 except TimeoutError:
   # expect 20min timeout on notebook call - the actual workflow will still run fine
   pass
 
-# could use and_wait on run_now_and_wait but may just timeout due to taking a while, consider...
-# clean up the no longer needed job once complete
+# OPTIONAL clean up the no longer needed job once complete 
+# (choosing to leave in place for manual checks etc)
 # w.jobs.delete(job_id=job_id)
 
 # COMMAND ----------

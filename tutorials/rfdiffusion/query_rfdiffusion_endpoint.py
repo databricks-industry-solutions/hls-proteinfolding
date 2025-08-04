@@ -20,8 +20,8 @@ DATABRICKS_URL = dbutils.notebook.entry_point.getDbutils().notebook().getContext
 # COMMAND ----------
 
 def hit_api(protein_length):
-    url = 'https://adb-830292400663869.9.azuredatabricks.net/serving-endpoints/rfdiffusion_unconditional/invocations'
-    headers = {'Authorization': f'Bearer {os.environ.get("DATABRICKS_TOKEN")}', 'Content-Type': 'application/json'}
+    url = f'{DATABRICKS_URL}/serving-endpoints/rfdiffusion_unconditional/invocations'
+    headers = {'Authorization': f'Bearer {DATABRICKS_TOKEN}', 'Content-Type': 'application/json'}
     ds_dict = {'inputs':protein_length}
     data_json = json.dumps(ds_dict, allow_nan=True)
     response = requests.request(method='POST', headers=headers, url=url, data=data_json)

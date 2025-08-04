@@ -37,9 +37,15 @@ def get_job_id(job_name : str ='alphafold'):
     if len(found_jobs)==1:
         found_job = found_jobs[0]
     if len(found_jobs)==0:
-            raise ValueError("No job with name", job_name)
-        else:
-            raise NotImplementedError("Multiple jobs with the same name found", [j.job_id for j in found_jobs])
+        raise ValueError("No job with name", job_name)
+    else:
+        found_jobs = sorted(
+            found_jobs,
+            key=lambda j: j.as_dict()['created_time'],
+            reverse=True
+        )
+        found_job = found_jobs[0]
+        print("Multiple jobs with the same name found, using the most recent")
     return found_job.job_id
 
 def count_active_runs(job_id):
@@ -69,8 +75,8 @@ def run_alphafold(protein_name, protein_sequence):
     run_id = w.jobs.run_now(
         job_id=job_id,
         job_parameters = {
-            'protein':'CASNYT',
-            'run_name':'my_small_protein'
+            'protein':protein_sequence,
+            'run_name':protein_name
         }
     )
     return run_id
@@ -92,10 +98,13 @@ job_id = get_job_id()
 
 # COMMAND ----------
 
+protein_name = "a_run_name"
+protein_sequence = "CASRV"
+
 run_id = run_alphafold(protein_name, protein_sequence)
 
 # use run_id to check run status etc
-run = get_run_status(run_id)
+run = get_run_status(run_id.run_id)
 
 # COMMAND ----------
 
@@ -109,3 +118,7 @@ run_status_counts(job_id)
 # COMMAND ----------
 
 count_active_runs(job_id)
+
+# COMMAND ----------
+
+
