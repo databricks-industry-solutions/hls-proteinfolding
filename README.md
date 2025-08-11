@@ -1,6 +1,6 @@
 # Protein Folding and Generative Protein Models on Databricks
 
-The ability to computationally predict the 3D structure of proteins with near experimental accuracy is revolutionizing bioinformatics research and the way drug discovery is done. The release of AlphaFold2 by DeepMind, which won the CASP14 competition, and RoseTTAFold from the Baker Lab were the first such models to demonstrate such high performance and played a key role in the decision to award three of the researchers involved in these works the 2024 Nobel Prize in Chemistry. Many biotech and pharmaceutical organizations are using these models, including generative models for protein design, to reimagine how AI can shape their R&D businesses. Use cases include not only predicting structures to speed up analysis but also for downstream prediction of molecule properties, drug-binding, and perhaps most excitingly, generating new drugs against targets. We show how model serving, workflows, and apps on Databricks allow one to have an all-in-one platform for both protein folding and even generative protein design with a variety of cutting-edge models. These models are easy to use for both expert and wet-lab scientists and are well-governed: organizations can track how the models are used, a key consideration for data of high proprietary value. Model serving on Databricks allows for the GPU compute on the endpoint to scale up and down with use, including scaling to zero which prevents cost in periods when models are not in use.<br><br>
+The ability to computationally predict the 3D structure of proteins with near-experimental accuracy is revolutionizing bioinformatics research and the way drug discovery is done. The release of AlphaFold2 by DeepMind, which won the CASP14 competition, and RoseTTAFold from the Baker Lab were the first such models to demonstrate such high performance and played a key role in the decision to award three of the researchers involved in these works the 2024 Nobel Prize in Chemistry. Many biotech and pharmaceutical organizations are using these models, including generative models for protein design, to reimagine how AI can shape their R&D businesses. Use cases include not only predicting structures to speed up analysis but also downstream prediction of molecule properties, drug-binding, and perhaps most excitingly, generating new drugs against targets. We show how model serving, workflows, and apps on Databricks allow one to have an all-in-one platform for both protein folding and even generative protein design with a variety of cutting-edge models. These models are easy to use for both expert and wet-lab scientists and are well-governed: organizations can track how the models are used, a key consideration for data of high proprietary value. Model serving on Databricks allows for the GPU compute on the endpoint to scale up and down with use, including scaling to zero, which prevents cost in periods when models are not in use.<br><br>
 
 <img src="./static/alphafold_app_screenshot.png" alt="App View" width="700">
 <br><br>
@@ -10,7 +10,7 @@ The ability to computationally predict the 3D structure of proteins with near ex
 **Structure Prediction Models:**
 - AlphaFold v2.3.2: uses Databricks workflows to download required datasets and can install workflows for separated CPU and GPU compute.
 - ESMFold: model serving of ESMFold
-- Boltz-1: Model serving of Boltz-1
+- Boltz-1: model serving of Boltz-1
 
 **Generative Protein Modelling Tools:**
 - RFDiffusion: model serving of unconditional protein generation and in-painting protein generation
@@ -20,11 +20,11 @@ The ability to computationally predict the 3D structure of proteins with near ex
 - Notebooks and source code to generate a protein folding app that can run model serving in real-time and submit and view AlphaFold workflow runs.
 
 ## Installation
-Inside /setup you can run the ""install" notebook and models will be registered and served with model serving, an alpahfold workflow will be created and the UI for easy interaction with models will be provisioned. 
+Inside /setup you can run the "install" notebook and models will be registered and served with model serving, an AlphaFold workflow will be created, and the UI for easy interaction with models will be provisioned. 
 
 License
 --------
-Please see LICENSE for the details of the license. Some packages, tools, and code used inside individual tutorials are under their own licenses as described therein. Please ensure you read the details of the tutorials and licensing of individual tools. Other thrid party packages are used in tutorials within this accelerator and have their own licensing, as laid out in the table below. We note also that we made minor modifations to alphafold2 code in both the alpahfold and boltz-1 tutorials, notes on the changes made can be found in those tutorials. The proteinMPNN package was reformatted from source in order to be packagable with pip. In the app tutorial we additionally modified examples from Modal-labs model-examples repo (MIT) for molstar viewer html construction, this is noted in the application tutorial also. NVIDIA GPUs and cudatoolkit may be used in multiple places so you should consider the NVIDIA EULA(link) when using code in this package.
+Please see LICENSE for the details of the license. Some packages, tools, and code used inside individual tutorials are under their own licenses as described therein. Please ensure you read the details of the tutorials and licensing of individual tools. Other third-party packages are used in tutorials within this accelerator and have their own licensing, as laid out in the table below. This accelerator uses multiple packages that may be outdated and have security issues due to upstream hard dependencies requirements of models. Use at your own risk. We note also that we made minor modifications to AlphaFold2 code in both the AlphaFold and Boltz-1 tutorials; notes on the changes made can be found in those tutorials. The ProteinMPNN package was reformatted from source in order to be packageable with pip. In the app tutorial, we additionally modified examples from Modal-labs model-examples repo (MIT) for Mol* viewer HTML construction; this is noted in the application tutorial also. NVIDIA GPUs and cudatoolkit may be used in multiple places, so you should consider the [NVIDIA EULA](https://docs.nvidia.com/cuda/eula/index.html) when using code in this package.
 
 Tutorial | Package | License | Source
 -------- | ------- | ------- | --------
@@ -56,7 +56,7 @@ ProteinMPNN | cloudpickle==2.2.1 | BSD-3 | https://github.com/cloudpipe/cloudpic
 ProteinMPNN | biopython==1.79 | [BioPython License Agreement](https://github.com/biopython/biopython/blob/master/LICENSE.rst) |  https://github.com/biopython/biopython
 ProteinMPNN | MODEL WEIGHTS | MIT | https://github.com/dauparas/ProteinMPNN
 Alphafold | AlphaFold (2.3.2) | Apache2.0 | https://github.com/google-deepmind/alphafold
-Alphafold | other dependencies | we provide a file of requirements per alphafold's own [repo](https://github.com/google-deepmind/alphafold), see [yml file](https://github.com/databricks-industry-solutions/hls-proteinfolding/blob/main/tutorials/alphafold/workflow/envs/alphafold_env.yml) for further details |
+Alphafold | other dependencies | we provide a file of requirements per AlphaFold's own [repo](https://github.com/google-deepmind/alphafold), see [yml file](https://github.com/databricks-industry-solutions/hls-proteinfolding/blob/main/tutorials/alphafold/workflow/envs/alphafold_env.yml) for further details |
 Alphafold | MODEL WEIGHTS | CC BY 4.0
 ESMfold | ESMFold |	MIT | https://github.com/facebookresearch/esm
 ESMfold | torch | BSD-3 | https://github.com/pytorch/pytorch
